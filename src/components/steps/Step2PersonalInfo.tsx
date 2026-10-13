@@ -39,7 +39,8 @@ const formatMobile: InputFormatter = (raw) => normalizeIndianMobile(raw).slice(0
 
 const VerifiedBadge = (
   <Badge tone="success" icon={<BadgeCheck aria-hidden="true" className="size-3.5" />} className="mr-2">
-    Verified
+    {/* Icon-only on narrow screens so the number stays readable; still announced. */}
+    <span className="max-sm:sr-only">Verified</span>
   </Badge>
 );
 
