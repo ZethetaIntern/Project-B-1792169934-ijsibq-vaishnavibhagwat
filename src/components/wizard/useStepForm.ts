@@ -13,6 +13,17 @@ import { createEmptyApplication } from '../../store/initialApplication';
 import type { ApplicationData, StepId } from '../../types/application';
 import { stepFormBridge, type StepController } from './stepFormBridge';
 
+/** Focuses the first invalid control in document order once errors have rendered. */
+function focusFirstInvalidField() {
+  window.setTimeout(() => {
+    const invalid = document.querySelector<HTMLElement>(
+      '#wizard-step-form [aria-invalid="true"], #wizard-step-form [data-invalid="true"]',
+    );
+    invalid?.focus();
+    invalid?.scrollIntoView?.({ block: 'center' });
+  }, 0);
+}
+
 /**
  * Creates the React Hook Form instance for a wizard step and plugs it into the Wizard.
  *
@@ -49,7 +60,8 @@ export function useStepForm<K extends StepId>(stepId: K): UseFormReturn<Applicat
     resolver,
     mode: 'onTouched',
     reValidateMode: 'onChange',
-    shouldFocusError: true,
+    // Focus is moved to the first invalid field in *visual* order instead (see below).
+    shouldFocusError: false,
   });
 
   // Re-sync when the store is hydrated (resume draft) or reset (start fresh).
@@ -73,7 +85,7 @@ export function useStepForm<K extends StepId>(stepId: K): UseFormReturn<Applicat
           // the abandoned branch instead of leaking stale data.
           const empty = createEmptyApplication()[stepId];
           replaceSection(stepId, { ...empty, ...parsed });
-        })();
+        }, focusFirstInvalidField)();
         return valid;
       },
       getValues: () => form.getValues(),

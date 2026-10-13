@@ -24,6 +24,7 @@ import { ProgressBar } from './ProgressBar';
 import { stepFormBridge } from './stepFormBridge';
 import { StepNavigation } from './StepNavigation';
 import { STEP_COMPONENTS } from './stepComponents';
+import { WizardNavigationContext, type WizardNavigation } from './WizardNavigationContext';
 
 const FORM_ID = 'wizard-step-form';
 const FOCUSABLE_FIELD = [
@@ -142,6 +143,14 @@ export function Wizard({ onSaveDraft }: WizardProps) {
     if (previous) navigate(previous);
   });
 
+  const navigation = useMemo<WizardNavigation>(() => ({
+    goTo: (target, options) => {
+      if (lockRef.current) return;
+      saveOpenStep();
+      if (canNavigateTo(target, getApplicationSnapshot().data)) navigate(target, options);
+    },
+  }), [navigate, saveOpenStep]);
+
   const handleSelect = (target: StepId) => runLocked(async () => {
     const targetIndex = steps.findIndex((step) => step.id === target);
     if (targetIndex > currentIndex) {
@@ -229,9 +238,11 @@ export function Wizard({ onSaveDraft }: WizardProps) {
               <p className="mb-6 text-[13px] text-slate">All fields are required unless marked Optional.</p>
             )}
             <Suspense fallback={<StepSkeleton />}>
-              <StepMountObserver onMount={handleStepMounted}>
-                <StepComponent />
-              </StepMountObserver>
+              <WizardNavigationContext.Provider value={navigation}>
+                <StepMountObserver onMount={handleStepMounted}>
+                  <StepComponent />
+                </StepMountObserver>
+              </WizardNavigationContext.Provider>
             </Suspense>
           </div>
         </form>

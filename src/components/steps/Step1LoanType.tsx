@@ -64,6 +64,17 @@ export default function Step1LoanType() {
   const tenures = useMemo(() => getAllowedTenures(loanType, ageLimit), [loanType, ageLimit]);
   const estimate = estimateForLoan(loanType, loanAmount, tenureMonths);
 
+  // Returning after a later answer (date of birth) made the saved tenure invalid:
+  // surface the problem immediately instead of waiting for the next Continue.
+  useEffect(() => {
+    const saved = getValues('tenureMonths');
+    if (saved !== null && !getAllowedTenures(getValues('loanType'), ageLimit).includes(saved)) {
+      trigger('tenureMonths');
+    }
+    // Run once on arrival only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Mirror edits into the store so the summary panel and step list update live
   // (e.g. the co-applicant step appears as soon as the amount crosses its threshold).
   useEffect(() => {
