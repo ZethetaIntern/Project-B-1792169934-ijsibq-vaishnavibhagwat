@@ -14,6 +14,7 @@ import {
   useDraftConflict, useIdleTimeout, useOnlineStatus,
 } from '../../hooks/useSessionSignals';
 import { getApplicationSnapshot, useApplicationStore } from '../../store/applicationStore';
+import { lockDrafts } from '../../utils/draftStorage';
 import { Button } from '../common/Button';
 import { Callout } from '../common/Callout';
 import { Modal } from '../common/Modal';
@@ -39,13 +40,14 @@ export default function ApplicationWorkspace() {
   const storeData = useApplicationStore((state) => state.data);
   const currentStepId = useApplicationStore((state) => state.currentStepId);
   const reset = useApplicationStore((state) => state.reset);
+  const submitted = useApplicationStore((state) => state.submission !== null);
   const { loanType } = storeData.loan;
   const product = getLoanProduct(loanType);
   const { toast } = useToast();
   const online = useOnlineStatus();
   const persistence = useFormPersistence();
   const [sessionExpired, setSessionExpired] = useState(false);
-  const ready = persistence.phase === 'ready' && !sessionExpired;
+  const ready = persistence.phase === 'ready' && !sessionExpired && !submitted;
 
   // Any committed change (store) or unsaved keystroke (open step) restarts the timer.
   const editVersion = useSyncExternalStore(
@@ -107,8 +109,12 @@ export default function ApplicationWorkspace() {
   const { conflictAt, dismissConflict } = useDraftConflict(loanType);
   useVaultJanitor();
 
-  // Clear applicant data from memory when leaving the workspace (B4.4).
-  useEffect(() => () => useApplicationStore.getState().reset(), []);
+  // Clear applicant data from memory when leaving the workspace (B4.4). A new
+  // workspace may save drafts again even if the previous one ended in a submission.
+  useEffect(() => {
+    lockDrafts(false);
+    return () => useApplicationStore.getState().reset();
+  }, []);
 
   const exit = async () => {
     await saveNow('exit');

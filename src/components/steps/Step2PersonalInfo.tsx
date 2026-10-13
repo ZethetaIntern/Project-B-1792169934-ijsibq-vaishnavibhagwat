@@ -1,6 +1,7 @@
 import { BadgeCheck, Send } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useWatch } from 'react-hook-form';
+import { GENDER_LABELS, MARITAL_STATUS_LABELS, toOptions } from '../../constants/labels';
 import { MIN_APPLICANT_AGE } from '../../constants/loan';
 import { useOtpVerification } from '../../hooks/useOtpVerification';
 import { isoDateYearsAgo } from '../../utils/dates';
@@ -21,18 +22,8 @@ import { useFieldStatus } from '../wizard/useFieldStatus';
 import { useStepForm } from '../wizard/useStepForm';
 import { useWizardNavigation } from '../wizard/WizardNavigationContext';
 
-const GENDER_OPTIONS = [
-  { value: 'male', label: 'Male' },
-  { value: 'female', label: 'Female' },
-  { value: 'other', label: 'Other' },
-];
-
-const MARITAL_OPTIONS = [
-  { value: 'single', label: 'Single' },
-  { value: 'married', label: 'Married' },
-  { value: 'divorced', label: 'Divorced' },
-  { value: 'widowed', label: 'Widowed' },
-];
+const GENDER_OPTIONS = toOptions(GENDER_LABELS);
+const MARITAL_OPTIONS = toOptions(MARITAL_STATUS_LABELS);
 
 /** Accepts typed or pasted numbers (+91, leading 0, spaces) and keeps 10 digits. */
 const formatMobile: InputFormatter = (raw) => normalizeIndianMobile(raw).slice(0, 10);

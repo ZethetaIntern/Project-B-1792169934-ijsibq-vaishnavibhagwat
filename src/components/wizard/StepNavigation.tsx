@@ -8,6 +8,8 @@ interface StepNavigationProps {
   /** Hide Continue on the final step — Submit lives in the review step itself. */
   showContinue: boolean;
   busy: boolean;
+  /** False while the step's form is still loading; Continue waits for it. */
+  stepReady?: boolean;
   continueLabel: string;
   /** Shorter label for narrow phones (≤ 640 px), e.g. "Review". */
   continueShortLabel?: string;
@@ -24,6 +26,7 @@ export function StepNavigation({
   onBack,
   showContinue,
   busy,
+  stepReady = true,
   continueLabel,
   continueShortLabel = continueLabel,
   onSaveDraft,
@@ -57,6 +60,7 @@ export function StepNavigation({
             type="submit"
             form={formId}
             loading={busy}
+            disabled={!stepReady}
             loadingText="Checking…"
             trailingIcon={<ArrowRight aria-hidden="true" className="size-4" />}
             className="min-w-36"

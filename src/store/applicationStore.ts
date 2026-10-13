@@ -2,6 +2,13 @@ import { create } from 'zustand';
 import type { ApplicationData, StepId } from '../types/application';
 import { createEmptyApplication } from './initialApplication';
 
+/** Returned by the (simulated) lender API once an application is accepted. */
+export interface SubmissionReceipt {
+  /** Client-generated UUID — there is no server in this project. */
+  reference: string;
+  submittedAt: string;
+}
+
 export interface ApplicationSnapshot {
   data: ApplicationData;
   currentStepId: StepId;
@@ -12,10 +19,13 @@ interface ApplicationState extends ApplicationSnapshot {
   returnToReview: boolean;
   /** Bumped on hydrate/reset so mounted step forms re-read their defaults. */
   revision: number;
+  /** Set once the application has been submitted; auto-save stops from then on. */
+  submission: SubmissionReceipt | null;
   updateSection: <K extends StepId>(section: K, values: Partial<ApplicationData[K]>) => void;
   replaceSection: <K extends StepId>(section: K, values: ApplicationData[K]) => void;
   goToStep: (stepId: StepId, options?: { fromReview?: boolean }) => void;
   hydrate: (snapshot: ApplicationSnapshot) => void;
+  completeSubmission: (receipt: SubmissionReceipt) => void;
   reset: () => void;
 }
 
@@ -34,6 +44,7 @@ export const useApplicationStore = create<ApplicationState>()((set) => ({
   currentStepId: INITIAL_STEP,
   returnToReview: false,
   revision: 0,
+  submission: null,
 
   updateSection: (section, values) => set((state) => ({
     data: { ...state.data, [section]: { ...state.data[section], ...values } },
@@ -53,7 +64,10 @@ export const useApplicationStore = create<ApplicationState>()((set) => ({
     currentStepId: snapshot.currentStepId,
     returnToReview: false,
     revision: state.revision + 1,
+    submission: null,
   })),
+
+  completeSubmission: (receipt) => set({ submission: receipt, returnToReview: false }),
 
   // Clears all applicant data from memory (used on unmount, Start fresh and submit).
   reset: () => set((state) => ({
@@ -61,6 +75,7 @@ export const useApplicationStore = create<ApplicationState>()((set) => ({
     currentStepId: INITIAL_STEP,
     returnToReview: false,
     revision: state.revision + 1,
+    submission: null,
   })),
 }));
 

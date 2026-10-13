@@ -4,6 +4,7 @@ import {
 } from './dates';
 import {
   assessAffordability,
+  calculateApr,
   calculateEmi,
   calculateProcessingFee,
   estimateForLoan,
@@ -58,6 +59,24 @@ describe('estimateLoan', () => {
     expect(estimateForLoan('business', 10_00_000, 60)?.annualRate).toBe(14);
     expect(estimateForLoan('', 10_00_000, 60)).toBeNull();
     expect(estimateForLoan('personal', null, 60)).toBeNull();
+  });
+});
+
+describe('calculateApr', () => {
+  it('equals the interest rate when there are no fees', () => {
+    const emi = calculateEmi(5_00_000, 10.5, 36);
+    expect(calculateApr(5_00_000, 0, emi, 36)).toBeCloseTo(10.5, 2);
+  });
+
+  it('rises above the interest rate once the processing fee is included', () => {
+    const estimate = estimateLoan(5_00_000, 10.5, 36);
+    expect(estimate.apr).toBeGreaterThan(10.5);
+    expect(estimate.apr).toBeCloseTo(11.18, 1);
+  });
+
+  it('handles degenerate inputs', () => {
+    expect(calculateApr(1_000, 2_000, 100, 12)).toBe(0);
+    expect(calculateApr(1_00_000, 0, 0, 12)).toBe(0);
   });
 });
 

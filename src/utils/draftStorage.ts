@@ -41,6 +41,16 @@ function storageKeys(): string[] {
     .filter((key): key is string => key !== null);
 }
 
+let draftsLocked = false;
+
+/**
+ * Blocks draft writes, e.g. right after submission: an auto-save that started
+ * encrypting a moment earlier must not write the draft back once it was cleared.
+ */
+export function lockDrafts(locked = true): void {
+  draftsLocked = locked;
+}
+
 export function deleteDraft(key: string): void {
   localStorage.removeItem(key);
   localStorage.removeItem(metaKeyFor(key));
@@ -103,6 +113,7 @@ export async function saveDraft(
     loanType: snapshot.data.loan.loanType,
     tabId,
   };
+  if (draftsLocked) throw new DraftUnavailableError('Drafts are locked after submission.');
   localStorage.setItem(key, sealed); // may throw QuotaExceededError — surfaced as "Couldn't save"
   localStorage.setItem(metaKeyFor(key), JSON.stringify(meta));
   storageKeys()
