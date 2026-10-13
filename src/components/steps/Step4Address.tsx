@@ -1,6 +1,7 @@
 import type { FormEvent } from 'react';
 import { Controller, FormProvider, useWatch } from 'react-hook-form';
 import { ADDRESS_PROOF_RULES } from '../../constants/documents';
+import { RESIDENCE_LABELS, toOptions } from '../../constants/labels';
 import { digitsOnly, formatPreservingCaret, isDigit } from '../../utils/inputFormatting';
 import { AddressFields } from '../common/AddressFields';
 import { Checkbox } from '../common/Checkbox';
@@ -13,12 +14,7 @@ import { Select } from '../common/Select';
 import { useFieldStatus } from '../wizard/useFieldStatus';
 import { useStepForm } from '../wizard/useStepForm';
 
-const RESIDENCE_OPTIONS = [
-  { value: 'owned', label: 'Owned by me' },
-  { value: 'rented', label: 'Rented' },
-  { value: 'company', label: 'Provided by employer' },
-  { value: 'family', label: 'Owned by family' },
-];
+const RESIDENCE_OPTIONS = toOptions(RESIDENCE_LABELS);
 
 const formatYears = (event: FormEvent<HTMLInputElement>) => {
   formatPreservingCaret(event.currentTarget, digitsOnly(2), isDigit);
