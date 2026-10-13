@@ -105,6 +105,8 @@ export interface InputFieldProps extends Omit<InputHTMLAttributes<HTMLInputEleme
   startAdornment?: ReactNode;
   /** Content rendered inside the control on the right, e.g. a badge or button. */
   endAdornment?: ReactNode;
+  /** Left padding reserved for the start adornment (Tailwind class). */
+  startPaddingClass?: string;
   /** Right padding reserved for the end adornment (Tailwind class). */
   endPaddingClass?: string;
   /** Classes for the wrapping element (positioning, width). */
@@ -121,6 +123,7 @@ const Field = forwardRef<HTMLInputElement, InputFieldProps>((
   {
     startAdornment,
     endAdornment,
+    startPaddingClass = 'pl-8',
     endPaddingClass = 'pr-11',
     wrapperClassName,
     overlay,
@@ -152,7 +155,7 @@ const Field = forwardRef<HTMLInputElement, InputFieldProps>((
         aria-describedby={describedBy(context, ariaDescribedBy)}
         className={cn(
           FIELD_CONTROL_CLASS,
-          Boolean(startAdornment) && 'pl-8',
+          Boolean(startAdornment) && startPaddingClass,
           (Boolean(endAdornment) || showSuccess) && endPaddingClass,
           className,
         )}
