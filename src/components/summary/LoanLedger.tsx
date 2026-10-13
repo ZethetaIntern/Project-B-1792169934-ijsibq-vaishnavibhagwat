@@ -12,7 +12,8 @@ const SEGMENTS = [
   { key: 'fee', label: 'Processing fee', swatch: 'bg-warning' },
 ] as const;
 
-function Composition({ estimate }: { estimate: LoanEstimate }) {
+/** Principal / interest / fee bar with its legend — the ledger's signature element. */
+export function LedgerComposition({ estimate }: { estimate: LoanEstimate }) {
   const values = {
     principal: estimate.principal,
     interest: estimate.totalInterest,
@@ -139,7 +140,7 @@ export function LoanLedger({ className }: { className?: string }) {
                 <span className="text-xs font-medium text-slate"> /mo</span>
               </span>
             </div>
-            <Composition estimate={estimate} />
+            <LedgerComposition estimate={estimate} />
           </div>
 
           <dl className="mx-5 flex flex-col gap-1.5 border-t border-dashed border-line-strong/50 pt-3 text-[13px]">
