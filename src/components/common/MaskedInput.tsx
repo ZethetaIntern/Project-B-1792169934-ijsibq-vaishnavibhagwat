@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from 'react';
 import { cn } from '../../utils/cn';
-import { maskSensitive } from '../../utils/format';
+import { maskSensitive, maskWithPrefix } from '../../utils/format';
 import {
   formatPreservingCaret,
   isAlphanumeric,
@@ -27,6 +27,8 @@ export interface MaskedInputProps extends TextFieldProps {
   isSignificant?: SignificantCharTest;
   /** Mask the value once the field loses focus. Defaults to true. */
   mask?: boolean;
+  /** 'inline' masks in place ("•••• •••• 0124"); 'prefix' collapses to "••••0,000". */
+  maskStyle?: 'inline' | 'prefix';
   /** Characters left visible at the end of a masked value. */
   visibleChars?: number;
   /** Used in the reveal button's accessible name, e.g. "PAN" → "Show PAN". */
@@ -55,6 +57,7 @@ export const MaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>((
     isSignificant = isAlphanumeric,
     mask = true,
     visibleChars = 4,
+    maskStyle = 'inline',
     revealLabel = 'value',
     trailing,
     startAdornment,
@@ -146,7 +149,7 @@ export const MaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>((
               Boolean(startAdornment) && 'pl-8',
             )}
           >
-            {maskSensitive(text, visibleChars)}
+            {maskStyle === 'prefix' ? maskWithPrefix(text, visibleChars) : maskSensitive(text, visibleChars)}
           </span>
         ) : null}
       />
