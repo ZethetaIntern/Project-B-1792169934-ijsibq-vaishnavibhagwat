@@ -12,6 +12,6 @@ export const STEP_COMPONENTS: Record<StepId, LazyExoticComponent<ComponentType>>
   address: lazy(() => import('../steps/Step4Address')),
   employment: lazy(() => import('../steps/Step5Employment')),
   coApplicant: lazy(() => import('../steps/Step6CoApplicant')),
-  documents: lazy(() => import('../steps/PlaceholderStep')),
+  documents: lazy(() => import('../steps/Step7Documents')),
   review: lazy(() => import('../steps/PlaceholderStep')),
 };

@@ -210,7 +210,11 @@ export function Wizard({ onSaveDraft }: WizardProps) {
   const isLast = currentIndex === steps.length - 1;
   const nextIsReview = steps[currentIndex + 1]?.id === 'review';
   let continueLabel = nextIsReview ? 'Review application' : 'Continue';
-  if (returnToReview) continueLabel = 'Save and return to review';
+  let continueShortLabel = nextIsReview ? 'Review' : 'Continue';
+  if (returnToReview) {
+    continueLabel = 'Save and return to review';
+    continueShortLabel = 'Back to review';
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -257,6 +261,7 @@ export function Wizard({ onSaveDraft }: WizardProps) {
         showContinue={!isLast}
         busy={busy}
         continueLabel={continueLabel}
+        continueShortLabel={continueShortLabel}
         onSaveDraft={onSaveDraft}
       />
     </div>

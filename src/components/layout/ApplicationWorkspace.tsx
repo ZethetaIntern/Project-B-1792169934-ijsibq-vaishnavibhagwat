@@ -9,6 +9,7 @@ import {
 import { useAutoSave } from '../../hooks/useAutoSave';
 import { useFormPersistence } from '../../hooks/useFormPersistence';
 import { navigateTo } from '../../hooks/useRoute';
+import { useVaultJanitor } from '../../hooks/useVaultJanitor';
 import {
   useDraftConflict, useIdleTimeout, useOnlineStatus,
 } from '../../hooks/useSessionSignals';
@@ -104,6 +105,7 @@ export default function ApplicationWorkspace() {
   }, ready);
 
   const { conflictAt, dismissConflict } = useDraftConflict(loanType);
+  useVaultJanitor();
 
   // Clear applicant data from memory when leaving the workspace (B4.4).
   useEffect(() => () => useApplicationStore.getState().reset(), []);

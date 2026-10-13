@@ -9,6 +9,8 @@ interface StepNavigationProps {
   showContinue: boolean;
   busy: boolean;
   continueLabel: string;
+  /** Shorter label for narrow phones (≤ 640 px), e.g. "Review". */
+  continueShortLabel?: string;
   onSaveDraft?: () => void;
 }
 
@@ -23,6 +25,7 @@ export function StepNavigation({
   showContinue,
   busy,
   continueLabel,
+  continueShortLabel = continueLabel,
   onSaveDraft,
 }: StepNavigationProps) {
   return (
@@ -42,9 +45,10 @@ export function StepNavigation({
             variant="ghost"
             onClick={onSaveDraft}
             leadingIcon={<Save aria-hidden="true" className="size-4" />}
-            className="hidden sm:inline-flex"
+            aria-label="Save draft"
+            className="max-sm:w-11 max-sm:gap-0 max-sm:px-0"
           >
-            Save draft
+            <span className="max-sm:hidden">Save draft</span>
           </Button>
         )}
         <div className="flex-1" />
@@ -57,7 +61,8 @@ export function StepNavigation({
             trailingIcon={<ArrowRight aria-hidden="true" className="size-4" />}
             className="min-w-36"
           >
-            {continueLabel}
+            <span className="sm:hidden">{continueShortLabel}</span>
+            <span className="max-sm:hidden">{continueLabel}</span>
           </Button>
         )}
       </div>

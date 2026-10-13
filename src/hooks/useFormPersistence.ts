@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useApplicationStore } from '../store/applicationStore';
+import { clearVault } from '../utils/documentVault';
 import {
   deleteDraft, listDrafts, loadDraft, type DraftSummary,
 } from '../utils/draftStorage';
@@ -36,6 +37,8 @@ export function useFormPersistence() {
 
   const startFresh = useCallback(() => {
     drafts.forEach((draft) => deleteDraft(draft.key));
+    // Every saved draft is gone, so no stored file is referenced any more.
+    clearVault().catch(() => undefined);
     setDrafts([]);
     reset();
     setPhase('ready');

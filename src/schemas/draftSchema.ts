@@ -1,6 +1,8 @@
 import { z } from 'zod';
+import { DOCUMENT_ORDER } from '../constants/documents';
 import { DRAFT_SCHEMA_VERSION } from '../constants/persistence';
 import { STEP_ORDER } from '../constants/steps';
+import type { DocumentTypeId } from '../types/application';
 import { uploadedDocument } from './common';
 
 /**
@@ -82,7 +84,10 @@ export const draftDataSchema = z.object({
     signature,
   }).strict(),
   documents: z.object({
-    files: z.record(z.string(), z.array(uploadedDocument).max(3)),
+    files: z.partialRecord(
+      z.enum(DOCUMENT_ORDER as [DocumentTypeId, ...DocumentTypeId[]]),
+      z.array(uploadedDocument).max(3),
+    ),
     signature,
     signatureMethod: z.enum(['', 'draw', 'type']),
   }).strict(),

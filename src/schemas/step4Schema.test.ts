@@ -88,4 +88,14 @@ describe('step 4 schema', () => {
   it('requires a residence type', () => {
     expect(errors({ residenceType: '' }).residenceType).toBe('Tell us whether you own or rent your home.');
   });
+
+  it('accepts up to three address proof files', () => {
+    const proof = {
+      id: 'p', name: 'bill.pdf', mimeType: 'application/pdf', originalSize: 1, size: 1, compressed: false, uploadedAt: '2026-10-13T10:00:00.000Z', verified: true,
+    };
+    expect(errors({ addressProof: [proof, proof, proof] })).toEqual({});
+    expect(errors({ addressProof: [proof, proof, proof, proof] })).toEqual({
+      addressProof: 'Address proof takes at most 3 files. Remove the extra ones.',
+    });
+  });
 });

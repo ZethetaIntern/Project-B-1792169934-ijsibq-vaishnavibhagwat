@@ -1,10 +1,12 @@
 import type { FormEvent } from 'react';
 import { Controller, FormProvider, useWatch } from 'react-hook-form';
+import { ADDRESS_PROOF_RULES } from '../../constants/documents';
 import { digitsOnly, formatPreservingCaret, isDigit } from '../../utils/inputFormatting';
 import { AddressFields } from '../common/AddressFields';
 import { Checkbox } from '../common/Checkbox';
 import { Collapse } from '../common/Collapse';
 import { CurrencyInput } from '../common/CurrencyInput';
+import { FileUpload } from '../common/FileUpload';
 import { FormSection } from '../common/FormSection';
 import { TextField } from '../common/Input';
 import { Select } from '../common/Select';
@@ -103,6 +105,28 @@ export default function Step4Address() {
             <AddressFields prefix="previous" autoCompleteSection="previous" />
           </FormSection>
         </Collapse>
+
+        <FormSection title="Proof of current address">
+          <Controller
+            control={control}
+            name="addressProof"
+            render={({ field }) => (
+              <FileUpload
+                name="addressProof"
+                label="Address proof"
+                optional
+                hint="A utility bill, rent agreement or bank statement from the last 3 months showing your current address. Helpful if your Aadhaar shows a different address."
+                rules={ADDRESS_PROOF_RULES}
+                files={field.value}
+                onChange={(next) => {
+                  field.onChange(next);
+                  field.onBlur();
+                }}
+                error={status('addressProof').error}
+              />
+            )}
+          />
+        </FormSection>
 
         <FormSection title="Permanent address" description="As recorded on your identity documents.">
           <Checkbox

@@ -36,4 +36,5 @@ export const uploadedDocument = z.object({
   size: z.number(),
   compressed: z.boolean(),
   uploadedAt: z.string(),
+  verified: z.boolean(),
 });

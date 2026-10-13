@@ -71,6 +71,8 @@ export interface UploadedDocument {
   size: number;
   compressed: boolean;
   uploadedAt: string;
+  /** Set once the simulated document check has passed. */
+  verified: boolean;
 }
 
 /** Step 4 — current, previous and permanent address. */
