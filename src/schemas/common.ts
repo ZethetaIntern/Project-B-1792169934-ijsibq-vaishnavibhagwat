@@ -26,3 +26,14 @@ export function sanitizeText(value: string): string {
 }
 
 export const text = z.string().transform(sanitizeText);
+
+/** Metadata of a file held in the document vault (the binary is stored separately). */
+export const uploadedDocument = z.object({
+  id: z.string(),
+  name: z.string(),
+  mimeType: z.string(),
+  originalSize: z.number(),
+  size: z.number(),
+  compressed: z.boolean(),
+  uploadedAt: z.string(),
+});
