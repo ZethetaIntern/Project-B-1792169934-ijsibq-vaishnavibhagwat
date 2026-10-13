@@ -78,6 +78,8 @@ export function Wizard({ onSaveDraft }: WizardProps) {
   const reachableIndex = useMemo(() => getReachableIndex(steps, data), [steps, data]);
   const meta = steps[currentIndex];
   const StepComponent = STEP_COMPONENTS[currentStepId];
+  // Stable element: live store updates (e.g. typed income) re-render the panel, not the form.
+  const stepElement = useMemo(() => <StepComponent />, [StepComponent]);
 
   const headingId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -240,7 +242,7 @@ export function Wizard({ onSaveDraft }: WizardProps) {
             <Suspense fallback={<StepSkeleton />}>
               <WizardNavigationContext.Provider value={navigation}>
                 <StepMountObserver onMount={handleStepMounted}>
-                  <StepComponent />
+                  {stepElement}
                 </StepMountObserver>
               </WizardNavigationContext.Provider>
             </Suspense>
