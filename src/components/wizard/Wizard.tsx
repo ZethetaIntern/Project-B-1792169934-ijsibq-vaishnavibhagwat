@@ -187,6 +187,8 @@ export function Wizard({ onSaveDraft }: WizardProps) {
   }, [navigate, saveOpenStep]);
 
   const handleStepMounted = useCallback(() => {
+    // Marks the step as interactive (form subscriptions are live) — used by E2E tests.
+    containerRef.current?.setAttribute('data-step-ready', 'true');
     if (!focusOnMountRef.current) return;
     focusOnMountRef.current = false;
     window.scrollTo({ top: 0 });

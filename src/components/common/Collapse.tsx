@@ -1,4 +1,6 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import {
+  useEffect, useRef, useState, type ReactNode,
+} from 'react';
 import { cn } from '../../utils/cn';
 
 interface CollapseProps {
@@ -19,30 +21,36 @@ const TRANSITION_MS = 300;
 export function Collapse({
   open, children, id, className,
 }: CollapseProps) {
-  const [mounted, setMounted] = useState(open);
+  // `closing` keeps content mounted while the close animation plays. Mounting is
+  // derived from `open`, so a late timer can never hide an open section.
+  const [closing, setClosing] = useState(false);
   const [expanded, setExpanded] = useState(open);
-  const [previousOpen, setPreviousOpen] = useState(open);
-
-  // Mount synchronously when opening (state adjustment during render, no effect).
-  if (open !== previousOpen) {
-    setPreviousOpen(open);
-    if (open) setMounted(true);
-  }
+  const wasOpen = useRef(open);
 
   useEffect(() => {
+    const justClosed = wasOpen.current && !open;
+    wasOpen.current = open;
     if (open) {
       // Expand on the next frame so the browser animates from the collapsed state.
-      const frame = requestAnimationFrame(() => setExpanded(true));
+      const frame = requestAnimationFrame(() => {
+        setClosing(false);
+        setExpanded(true);
+      });
       return () => cancelAnimationFrame(frame);
     }
-    const timer = window.setTimeout(() => {
-      setMounted(false);
+    if (!justClosed) return undefined;
+    const frame = requestAnimationFrame(() => {
+      setClosing(true);
       setExpanded(false);
-    }, TRANSITION_MS);
-    return () => window.clearTimeout(timer);
+    });
+    const timer = window.setTimeout(() => setClosing(false), TRANSITION_MS);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
   }, [open]);
 
-  if (!mounted) return null;
+  if (!open && !expanded && !closing) return null;
 
   return (
     <div id={id} className="collapse-grid" data-open={open && expanded} inert={!open}>
