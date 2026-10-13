@@ -52,7 +52,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((
           variant === 'card' && error && 'border-danger-ink',
         )}
       >
-        <span className="relative mt-0.5 flex size-5 shrink-0 items-center justify-center">
+        <span className="relative z-10 mt-0.5 flex size-5 shrink-0 items-center justify-center">
           <input
             {...inputProps}
             ref={ref}
