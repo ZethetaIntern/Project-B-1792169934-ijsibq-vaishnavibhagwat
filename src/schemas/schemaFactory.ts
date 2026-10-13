@@ -11,7 +11,13 @@ import { buildStep8Schema } from './step8Schema';
 
 /**
  * Builds the Zod schema for one step from the *whole* application, so a step's
- * rules can depend on answers given elsewhere (cross-step dependencies).
+ * rules can depend on answers given elsewhere. All 14 cross-step dependencies, and
+ * where each is enforced, are listed in `CROSS_STEP_DEPENDENCIES` (dependencies.ts).
+ *
+ * Schemas are rebuilt from the latest application every time they are used, so
+ * changing an earlier answer (e.g. the loan type after reaching Step 5) immediately
+ * re-validates later steps: Continue and the review page see the new rules, and
+ * `getActiveSteps` inserts or drops the co-applicant step.
  */
 export type StepSchemaBuilder = (application: ApplicationData) => z.ZodType;
 
