@@ -40,14 +40,16 @@ export function renderTypedSignature(name: string, width = 600, height = 180): s
 function useWindowInactive(): boolean {
   const [inactive, setInactive] = useState(false);
   useEffect(() => {
-    const update = () => setInactive(document.visibilityState === 'hidden' || !document.hasFocus());
-    window.addEventListener('blur', update);
-    window.addEventListener('focus', update);
-    document.addEventListener('visibilitychange', update);
+    const hide = () => setInactive(true);
+    const show = () => setInactive(false);
+    const onVisibility = () => setInactive(document.visibilityState === 'hidden');
+    window.addEventListener('blur', hide);
+    window.addEventListener('focus', show);
+    document.addEventListener('visibilitychange', onVisibility);
     return () => {
-      window.removeEventListener('blur', update);
-      window.removeEventListener('focus', update);
-      document.removeEventListener('visibilitychange', update);
+      window.removeEventListener('blur', hide);
+      window.removeEventListener('focus', show);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
   }, []);
   return inactive;
