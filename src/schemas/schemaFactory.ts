@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { ApplicationData, StepId } from '../types/application';
 import { buildStep1Schema } from './step1Schema';
+import { buildStep2Schema } from './step2Schema';
 
 /**
  * Builds the Zod schema for one step from the *whole* application, so a step's
@@ -11,6 +12,7 @@ export type StepSchemaBuilder = (application: ApplicationData) => z.ZodType;
 /** Steps register their builders here as they are implemented. */
 const STEP_SCHEMA_BUILDERS: Partial<Record<StepId, StepSchemaBuilder>> = {
   loan: (application) => buildStep1Schema(application),
+  personal: (application) => buildStep2Schema(application),
 };
 
 /** Placeholder for steps that have no rules yet: accepts the section as-is. */
