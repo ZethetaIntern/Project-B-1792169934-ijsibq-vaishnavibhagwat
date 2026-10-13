@@ -20,7 +20,10 @@ export function isCompressibleImage(file: Blob): boolean {
   return file.type === 'image/jpeg' || file.type === 'image/png';
 }
 
-/** Decodes an image file. The object URL is revoked as soon as it has loaded. */
+/**
+ * Decodes an image file. `decode()` runs off the main thread where supported, so a
+ * large photo does not freeze the page. The object URL is revoked once loaded.
+ */
 function loadImage(file: Blob): Promise<HTMLImageElement> {
   const url = URL.createObjectURL(file);
   return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -28,7 +31,12 @@ function loadImage(file: Blob): Promise<HTMLImageElement> {
     image.onload = () => resolve(image);
     image.onerror = () => reject(new Error('This image could not be read. It may be damaged.'));
     image.src = url;
-  }).finally(() => URL.revokeObjectURL(url));
+  })
+    .then(async (image) => {
+      await image.decode?.().catch(() => undefined);
+      return image;
+    })
+    .finally(() => URL.revokeObjectURL(url));
 }
 
 function canvasToJpeg(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
@@ -43,15 +51,7 @@ function canvasToJpeg(canvas: HTMLCanvasElement, quality: number): Promise<Blob>
 
 const toJpegName = (name: string) => `${name.replace(/\.[^./]+$/, '') || 'image'}.jpg`;
 
-/**
- * Shrinks a JPG/PNG on the device before upload, as specified in C4:
- * scale to at most 1200 px wide (keeping the aspect ratio), encode as JPEG at
- * quality 0.7, then step the quality down by 0.1 until the file is under 2 MB or
- * quality reaches 0.3. PDFs are never passed through here.
- *
- * `toBlob` encodes asynchronously, so the page stays responsive between steps.
- */
-export async function compressImage(file: File): Promise<CompressionResult> {
+async function compressNow(file: File): Promise<CompressionResult> {
   const unchanged: CompressionResult = {
     file, originalSize: file.size, size: file.size, compressed: false, quality: null,
   };
@@ -68,6 +68,7 @@ export async function compressImage(file: File): Promise<CompressionResult> {
   context.fillStyle = '#ffffff';
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  image.src = ''; // let the browser drop the full-size decoded bitmap
 
   // Work in whole tenths so 0.7 → 0.3 never drifts through floating-point error.
   const minTenths = Math.round(COMPRESSION_MIN_QUALITY * 10);
@@ -92,4 +93,22 @@ export async function compressImage(file: File): Promise<CompressionResult> {
     compressed: true,
     quality: tenths / 10,
   };
+}
+
+let queue: Promise<unknown> = Promise.resolve();
+
+/**
+ * Shrinks a JPG/PNG on the device before upload, as specified in C4:
+ * scale to at most 1200 px wide (keeping the aspect ratio), encode as JPEG at
+ * quality 0.7, then step the quality down by 0.1 until the file is under 2 MB or
+ * quality reaches 0.3. PDFs are never passed through here.
+ *
+ * `toBlob` encodes asynchronously, so the page stays responsive between steps.
+ * Images are processed one at a time: five large photos dropped together would
+ * otherwise hold five full-size bitmaps (~30 MB each) in memory at once.
+ */
+export function compressImage(file: File): Promise<CompressionResult> {
+  const run = queue.then(() => compressNow(file));
+  queue = run.catch(() => undefined);
+  return run;
 }
