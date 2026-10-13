@@ -37,3 +37,13 @@ export function describedBy(context: FieldContextValue, extra?: string): string 
   ].filter(Boolean);
   return ids.length ? ids.join(' ') : undefined;
 }
+
+/** ARIA wiring every form control inside a field root needs. */
+export function controlAriaProps(context: FieldContextValue, extraDescribedBy?: string) {
+  return {
+    id: context.fieldId,
+    'aria-invalid': context.error ? true : undefined,
+    'aria-required': context.optional ? undefined : true,
+    'aria-describedby': describedBy(context, extraDescribedBy),
+  } as const;
+}
