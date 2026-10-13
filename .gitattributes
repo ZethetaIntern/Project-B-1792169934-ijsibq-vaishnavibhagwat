@@ -1,0 +1,12 @@
+# Normalise line endings across Windows/macOS/Linux contributors
+* text=auto eol=lf
+
+# Lockfiles are machine-generated: keep them out of line-based diffs
+package-lock.json -diff linguist-generated=true
+
+# Binary fixtures
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.woff2 binary
