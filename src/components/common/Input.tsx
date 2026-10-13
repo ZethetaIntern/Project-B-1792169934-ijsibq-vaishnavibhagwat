@@ -109,6 +109,8 @@ export interface InputFieldProps extends Omit<InputHTMLAttributes<HTMLInputEleme
   endPaddingClass?: string;
   /** Classes for the wrapping element (positioning, width). */
   wrapperClassName?: string;
+  /** Decorative layer drawn over the input (e.g. a masked rendering of its value). */
+  overlay?: ReactNode;
 }
 
 /**
@@ -121,6 +123,7 @@ const Field = forwardRef<HTMLInputElement, InputFieldProps>((
     endAdornment,
     endPaddingClass = 'pr-11',
     wrapperClassName,
+    overlay,
     className,
     'aria-describedby': ariaDescribedBy,
     ...inputProps
@@ -154,6 +157,7 @@ const Field = forwardRef<HTMLInputElement, InputFieldProps>((
           className,
         )}
       />
+      {overlay}
       {showSuccess && (
         <CircleCheck
           aria-hidden="true"
@@ -162,7 +166,7 @@ const Field = forwardRef<HTMLInputElement, InputFieldProps>((
         />
       )}
       {endAdornment && (
-        <span className="absolute right-1.5 flex items-center gap-1">{endAdornment}</span>
+        <span className="absolute inset-y-0 right-0 flex items-center gap-1 pr-1">{endAdornment}</span>
       )}
     </div>
   );
