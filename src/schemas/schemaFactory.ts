@@ -5,6 +5,7 @@ import { buildStep2Schema } from './step2Schema';
 import { buildStep3Schema } from './step3Schema';
 import { buildStep4Schema } from './step4Schema';
 import { buildStep5Schema } from './step5Schema';
+import { buildStep6Schema } from './step6Schema';
 
 /**
  * Builds the Zod schema for one step from the *whole* application, so a step's
@@ -19,6 +20,7 @@ const STEP_SCHEMA_BUILDERS: Partial<Record<StepId, StepSchemaBuilder>> = {
   kyc: (application) => buildStep3Schema(application),
   address: () => buildStep4Schema(),
   employment: (application) => buildStep5Schema(application),
+  coApplicant: (application) => buildStep6Schema(application),
 };
 
 /** Placeholder for steps that have no rules yet: accepts the section as-is. */
