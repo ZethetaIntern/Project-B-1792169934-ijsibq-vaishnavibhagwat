@@ -39,7 +39,7 @@ export const STEPS: readonly StepMeta[] = [
     shortTitle: 'Identity',
     description: 'Add your PAN and Aadhaar. Verification here is simulated — nothing is sent to NSDL or UIDAI.',
     guidance: [
-      'PAN numbers follow the pattern ABCDE1234F.',
+      'PAN numbers follow the pattern ABCPE1234F — the 4th letter shows the holder type.',
       'Aadhaar numbers are checked with the Verhoeff checksum before verification.',
       'Both numbers are masked once you leave the field.',
     ],

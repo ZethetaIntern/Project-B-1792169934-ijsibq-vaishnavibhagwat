@@ -8,7 +8,7 @@ import type { StepId } from '../../types/application';
 export const STEP_COMPONENTS: Record<StepId, LazyExoticComponent<ComponentType>> = {
   loan: lazy(() => import('../steps/Step1LoanType')),
   personal: lazy(() => import('../steps/Step2PersonalInfo')),
-  kyc: lazy(() => import('../steps/PlaceholderStep')),
+  kyc: lazy(() => import('../steps/Step3KYC')),
   address: lazy(() => import('../steps/PlaceholderStep')),
   employment: lazy(() => import('../steps/PlaceholderStep')),
   coApplicant: lazy(() => import('../steps/PlaceholderStep')),
