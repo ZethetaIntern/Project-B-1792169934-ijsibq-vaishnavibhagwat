@@ -37,7 +37,7 @@ export function renderTypedSignature(name: string, width = 600, height = 180): s
 }
 
 /** Hides the signature while the window is in the background (basic anti-capture measure). */
-function useWindowInactive(): boolean {
+export function useWindowInactive(): boolean {
   const [inactive, setInactive] = useState(false);
   useEffect(() => {
     const hide = () => setInactive(true);
@@ -55,7 +55,7 @@ function useWindowInactive(): boolean {
   return inactive;
 }
 
-function InactiveShield({ show }: { show: boolean }) {
+export function InactiveShield({ show }: { show: boolean }) {
   if (!show) return null;
   return (
     <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-field bg-surface/95 text-sm font-medium text-slate backdrop-blur-sm">
