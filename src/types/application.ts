@@ -118,7 +118,7 @@ export interface CoApplicantDetails {
   signature: string;
 }
 
-export type DocumentTypeId = | 'panCard'
+export type DocumentTypeId = 'panCard'
   | 'aadhaarCard'
   | 'salarySlips'
   | 'bankStatements'
