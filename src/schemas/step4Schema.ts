@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ADDRESS_PROOF_RULES } from '../constants/documents';
 import { createEmptyAddress } from '../store/initialApplication';
 import { formatINR } from '../utils/format';
 import { addressShape, checkAddress } from './addressSchema';
@@ -52,6 +53,10 @@ export function buildStep4Schema() {
 
     if (!address.permanentSameAsCurrent) {
       checkAddress(ctx, 'permanent', address.permanent, 'your permanent address');
+    }
+
+    if (address.addressProof.length > ADDRESS_PROOF_RULES.maxFiles) {
+      fail(ctx, ['addressProof'], `Address proof takes at most ${ADDRESS_PROOF_RULES.maxFiles} files. Remove the extra ones.`);
     }
   }).transform((address) => ({
     ...address,
