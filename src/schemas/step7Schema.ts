@@ -14,7 +14,8 @@ export function buildStep7Schema(application: ApplicationData) {
   const applicable = new Set<DocumentTypeId>(requirements.map((item) => item.spec.id));
 
   return z.object({
-    files: z.record(z.string(), z.array(uploadedDocument)),
+    // Uploaders that were never used report `undefined`; treat them as empty.
+    files: z.record(z.string(), z.array(uploadedDocument).optional()),
     signature: z.string(),
     signatureMethod: z.enum(['', 'draw', 'type']),
   }).superRefine((documents, ctx) => {
@@ -36,7 +37,7 @@ export function buildStep7Schema(application: ApplicationData) {
     ...documents,
     files: Object.fromEntries(
       Object.entries(documents.files).filter(
-        ([id, files]) => applicable.has(id as DocumentTypeId) && files.length > 0,
+        ([id, files]) => applicable.has(id as DocumentTypeId) && Boolean(files?.length),
       ),
     ),
   }));

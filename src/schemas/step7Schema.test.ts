@@ -75,6 +75,15 @@ describe('step 7 schema', () => {
     ]);
   });
 
+  it('treats uploaders that were never used as empty', () => {
+    const documents = completePersonalSalaried();
+    const files = { ...documents.files, panCard: undefined };
+    expect(errors(application('personal', 'salaried'), { ...documents, files })).toEqual({});
+    expect(errors(application('personal', 'salaried', false), { ...documents, files })).toEqual({
+      'files.panCard': 'Upload your PAN card.',
+    });
+  });
+
   it('explains a missing Aadhaar side', () => {
     const documents = completePersonalSalaried();
     documents.files.aadhaarCard = [file('image/jpeg')];
