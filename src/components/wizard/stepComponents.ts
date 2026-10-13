@@ -9,7 +9,7 @@ export const STEP_COMPONENTS: Record<StepId, LazyExoticComponent<ComponentType>>
   loan: lazy(() => import('../steps/Step1LoanType')),
   personal: lazy(() => import('../steps/Step2PersonalInfo')),
   kyc: lazy(() => import('../steps/Step3KYC')),
-  address: lazy(() => import('../steps/PlaceholderStep')),
+  address: lazy(() => import('../steps/Step4Address')),
   employment: lazy(() => import('../steps/PlaceholderStep')),
   coApplicant: lazy(() => import('../steps/PlaceholderStep')),
   documents: lazy(() => import('../steps/PlaceholderStep')),

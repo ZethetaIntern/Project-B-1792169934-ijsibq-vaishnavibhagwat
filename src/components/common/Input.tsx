@@ -198,6 +198,8 @@ export interface TextFieldProps extends InputFieldProps {
   label: ReactNode;
   error?: string;
   helpText?: ReactNode;
+  /** Help above the control (default) or below it — below keeps rows of fields aligned. */
+  helpPosition?: 'above' | 'below';
   optional?: boolean;
   isValid?: boolean;
   fieldClassName?: string;
@@ -206,14 +208,23 @@ export interface TextFieldProps extends InputFieldProps {
 /** Convenience composition of the compound parts for the common case. */
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>((
   {
-    label, error, helpText, optional, isValid, id, fieldClassName, ...fieldProps
+    label,
+    error,
+    helpText,
+    helpPosition = 'above',
+    optional,
+    isValid,
+    id,
+    fieldClassName,
+    ...fieldProps
   },
   ref,
 ) => (
   <Input id={id} error={error} optional={optional} isValid={isValid} className={fieldClassName}>
     <Input.Label>{label}</Input.Label>
-    {helpText && <Input.HelpText>{helpText}</Input.HelpText>}
+    {helpText && helpPosition === 'above' && <Input.HelpText>{helpText}</Input.HelpText>}
     <Input.Field ref={ref} {...fieldProps} />
+    {helpText && helpPosition === 'below' && <Input.HelpText>{helpText}</Input.HelpText>}
     <Input.Error />
   </Input>
 ));
