@@ -67,7 +67,7 @@ export const STEPS: readonly StepMeta[] = [
   {
     id: 'coApplicant',
     title: 'Add a co-applicant',
-    shortTitle: 'Co-applicant',
+    shortTitle: 'Co-app',
     description: 'This loan needs a co-applicant. Their income is combined with yours for affordability.',
     guidance: [
       'Required for Home Loans, Personal Loans above ₹5 lakh and Business Loans above ₹20 lakh.',

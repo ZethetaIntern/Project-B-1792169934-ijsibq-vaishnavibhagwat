@@ -6,7 +6,7 @@ import type { StepId } from '../../types/application';
  * keeping the main chunk small for low-end devices on patchy networks.
  */
 export const STEP_COMPONENTS: Record<StepId, LazyExoticComponent<ComponentType>> = {
-  loan: lazy(() => import('../steps/PlaceholderStep')),
+  loan: lazy(() => import('../steps/Step1LoanType')),
   personal: lazy(() => import('../steps/PlaceholderStep')),
   kyc: lazy(() => import('../steps/PlaceholderStep')),
   address: lazy(() => import('../steps/PlaceholderStep')),

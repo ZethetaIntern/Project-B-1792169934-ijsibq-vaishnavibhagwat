@@ -4,6 +4,8 @@ import { getLoanProduct } from '../../constants/loan';
 import { navigateTo } from '../../hooks/useRoute';
 import { useApplicationStore } from '../../store/applicationStore';
 import { Button } from '../common/Button';
+import { LoanLedger } from '../summary/LoanLedger';
+import { MobileLoanSummary } from '../summary/MobileLoanSummary';
 import { Wizard } from '../wizard/Wizard';
 import { AppHeader } from './AppHeader';
 import { StepGuidance } from './StepGuidance';
@@ -36,10 +38,12 @@ export default function ApplicationWorkspace() {
       />
       <div className="mx-auto grid max-w-6xl gap-8 px-4 pt-6 pb-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-10 lg:pt-10">
         <main id="main-content" className="min-w-0">
+          <MobileLoanSummary />
           <Wizard />
         </main>
         <aside aria-label="Application summary" className="hidden lg:block">
           <div className="sticky top-24 flex flex-col gap-4">
+            <LoanLedger />
             <StepGuidance />
           </div>
         </aside>
