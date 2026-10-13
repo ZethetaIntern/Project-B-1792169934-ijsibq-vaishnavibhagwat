@@ -27,6 +27,33 @@ export function calculateProcessingFee(loanAmount: number): number {
   return Math.min(Math.max(fee, MIN_PROCESSING_FEE), MAX_PROCESSING_FEE);
 }
 
+/**
+ * Annual Percentage Rate, as shown in a Key Fact Statement: the yearly rate at which
+ * the instalments exactly repay the amount actually received (principal minus
+ * upfront fees). Solved for the monthly rate by bisection, then annualised (× 12).
+ */
+export function calculateApr(
+  principal: number,
+  upfrontFees: number,
+  emi: number,
+  months: number,
+): number {
+  const netDisbursed = principal - upfrontFees;
+  if (!(netDisbursed > 0) || !(emi > 0) || !(months > 0)) return 0;
+  if (emi * months <= netDisbursed) return 0;
+  const presentValue = (monthlyRate: number) => (
+    (emi * (1 - (1 + monthlyRate) ** -months)) / monthlyRate
+  );
+  let low = 1e-9;
+  let high = 1;
+  for (let iteration = 0; iteration < 100; iteration += 1) {
+    const mid = (low + high) / 2;
+    if (presentValue(mid) > netDisbursed) low = mid;
+    else high = mid;
+  }
+  return Math.round(((low + high) / 2) * 12 * 100 * 100) / 100;
+}
+
 export interface LoanEstimate {
   principal: number;
   tenureMonths: number;
@@ -41,6 +68,8 @@ export interface LoanEstimate {
   totalRepayment: number;
   /** Everything the borrower pays: instalments + processing fee. */
   totalPayable: number;
+  /** Annual Percentage Rate including the processing fee, % p.a. */
+  apr: number;
 }
 
 /** All figures for the pre-approval summary / Key Fact Statement. */
@@ -61,6 +90,7 @@ export function estimateLoan(
     processingFee,
     totalRepayment,
     totalPayable: totalRepayment + processingFee,
+    apr: calculateApr(principal, processingFee, emi, tenureMonths),
   };
 }
 
