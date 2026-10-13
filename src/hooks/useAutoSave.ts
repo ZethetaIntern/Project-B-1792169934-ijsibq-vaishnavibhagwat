@@ -49,6 +49,9 @@ export function useAutoSave(
   const [lastDurationMs, setLastDurationMs] = useState<number | null>(null);
   const timerRef = useRef<number | undefined>(undefined);
   const firstUnsavedChangeAt = useRef<number | null>(null);
+  // Unsaved changes exist. Automatic saves are skipped when nothing changed, so a
+  // reload never silently overwrites the stored draft (e.g. one edited outside the app).
+  const dirty = useRef(false);
   const callbacks = useRef({
     getSnapshot, onSaved, onError, enabled,
   });
@@ -65,12 +68,14 @@ export function useAutoSave(
     if (!current.enabled) return false;
     const snapshot = current.getSnapshot();
     if (isBlank(snapshot)) return false;
+    if (trigger !== 'manual' && !dirty.current) return false;
 
     setStatus('saving');
     const started = performance.now();
     try {
       const summary = await saveDraft(snapshot);
       firstUnsavedChangeAt.current = null;
+      dirty.current = false;
       setLastDurationMs(Math.round(performance.now() - started));
       setLastSavedAt(new Date(summary.timestamp));
       setStatus('saved');
@@ -92,6 +97,7 @@ export function useAutoSave(
     }
     if (!callbacks.current.enabled) return undefined;
     const now = Date.now();
+    dirty.current = true;
     firstUnsavedChangeAt.current ??= now;
     const maxWaitLeft = 2 * interval - (now - firstUnsavedChangeAt.current);
     window.clearTimeout(timerRef.current);
