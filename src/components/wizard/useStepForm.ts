@@ -92,7 +92,14 @@ export function useStepForm<K extends StepId>(stepId: K): UseFormReturn<Applicat
       fill: (values) => form.reset(values, { keepDefaultValues: true }),
     };
     stepFormBridge.attach(controller as unknown as StepController);
-    return () => stepFormBridge.detach(controller as unknown as StepController);
+    const unsubscribeEdits = form.subscribe({
+      formState: { values: true },
+      callback: () => stepFormBridge.notifyEdit(),
+    });
+    return () => {
+      unsubscribeEdits();
+      stepFormBridge.detach(controller as unknown as StepController);
+    };
   }, [form, replaceSection, stepId]);
 
   return form;

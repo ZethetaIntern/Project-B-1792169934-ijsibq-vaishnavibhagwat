@@ -16,6 +16,8 @@ export interface StepController<K extends StepId = StepId> {
 }
 
 let activeController: StepController | null = null;
+let editVersion = 0;
+const editListeners = new Set<() => void>();
 
 export const stepFormBridge = {
   attach(controller: StepController) {
@@ -27,6 +29,18 @@ export const stepFormBridge = {
   get(): StepController | null {
     return activeController;
   },
+  /** Called by step forms on every field edit (drives auto-save timing). */
+  notifyEdit() {
+    editVersion += 1;
+    editListeners.forEach((listener) => listener());
+  },
+  subscribeToEdits(listener: () => void) {
+    editListeners.add(listener);
+    return () => {
+      editListeners.delete(listener);
+    };
+  },
+  getEditVersion: () => editVersion,
 };
 
 /**
