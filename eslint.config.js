@@ -69,6 +69,19 @@ export default [
       'jsx-a11y/label-has-associated-control': ['error', { assert: 'either', depth: 3 }],
       // PII must never reach the console; the logger utility is the only sanctioned sink.
       'no-console': 'error',
+      // Same options as the original eslint-config-airbnb: long string literals (Tailwind
+      // class lists, copy) are exempt, code is not.
+      '@stylistic/max-len': [
+        'error',
+        {
+          code: 100,
+          ignoreUrls: true,
+          ignoreComments: false,
+          ignoreRegExpLiterals: true,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true,
+        },
+      ],
     },
   },
   {
