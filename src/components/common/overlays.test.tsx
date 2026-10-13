@@ -1,5 +1,5 @@
 import {
-  act, render, screen, waitFor,
+  render, screen, waitFor,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
@@ -96,11 +96,6 @@ describe('Toast', () => {
     const region = screen.getByRole('status');
     expect(region).toHaveAttribute('aria-live', 'polite');
     expect(screen.getAllByText('Draft saved at 10:42')).toHaveLength(1);
-    await act(async () => {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 80);
-      });
-    });
-    expect(screen.queryByText('Draft saved at 10:42')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText('Draft saved at 10:42')).not.toBeInTheDocument());
   });
 });
