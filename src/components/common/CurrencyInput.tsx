@@ -50,6 +50,7 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>((
       inputMode="numeric"
       startAdornment={RUPEE}
       mask={sensitive}
+      maskStyle="prefix"
       revealLabel={revealLabel}
       format={formatCurrencyInput(maxDigits)}
       isSignificant={isDigit}

@@ -10,6 +10,7 @@ import {
   formatPercent,
   formatTenure,
   maskSensitive,
+  maskWithPrefix,
   parseIndianNumber,
 } from './format';
 
@@ -93,6 +94,15 @@ describe('maskSensitive', () => {
   it('handles short and empty values', () => {
     expect(maskSensitive('12')).toBe('12');
     expect(maskSensitive('')).toBe('');
+  });
+});
+
+describe('maskWithPrefix', () => {
+  it('replaces everything before the last four digits with a fixed prefix', () => {
+    expect(maskWithPrefix('80,00,000')).toBe('••••0,000');
+    expect(maskWithPrefix('2,10,000')).toBe('••••0,000');
+    expect(maskWithPrefix('9,500')).toBe('9,500');
+    expect(maskWithPrefix('')).toBe('');
   });
 });
 

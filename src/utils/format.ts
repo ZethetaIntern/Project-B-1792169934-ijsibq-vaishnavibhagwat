@@ -108,3 +108,19 @@ export function formatDisplayDate(isoDate: string): string {
   if (Number.isNaN(date.getTime())) return '';
   return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
+
+/**
+ * Masks everything before the last `visible` significant characters with a fixed
+ * prefix, keeping the tail's own separators: "80,00,000" → "••••0,000".
+ * Reads better than in-place masking for grouped amounts.
+ */
+export function maskWithPrefix(value: string, visible = 4, prefix = '••••'): string {
+  if (!value) return '';
+  let seen = 0;
+  let start = value.length;
+  for (let index = value.length - 1; index >= 0 && seen < visible; index -= 1) {
+    if (/[^\s,]/.test(value[index])) seen += 1;
+    start = index;
+  }
+  return start === 0 ? value : `${prefix}${value.slice(start)}`;
+}
