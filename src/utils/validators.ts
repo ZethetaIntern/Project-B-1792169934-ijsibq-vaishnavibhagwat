@@ -144,6 +144,43 @@ export function validateAadhaar(digits: string): string | null {
   return null;
 }
 
+/* ---------------------------------------------------------------- GSTIN */
+
+const GSTIN_CHARSET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+/**
+ * GSTIN check character: weights alternate 1, 2 over the first 14 characters
+ * (base 36); each product contributes quotient + remainder of division by 36.
+ */
+export function gstinCheckCharacter(first14: string): string {
+  const sum = first14.split('').reduce((total, char, index) => {
+    const product = GSTIN_CHARSET.indexOf(char) * (index % 2 === 0 ? 1 : 2);
+    return total + Math.floor(product / 36) + (product % 36);
+  }, 0);
+  return GSTIN_CHARSET[(36 - (sum % 36)) % 36];
+}
+
+/** 15 characters: state code (2) + PAN (10) + registration no. (1) + "Z" + checksum (1). */
+export function validateGstin(value: string): string | null {
+  if (value.length !== 15) return 'A GSTIN is 15 characters long, e.g. 29ABCPE1234F1Z5.';
+  if (!/^[0-9A-Z]+$/.test(value)) return 'A GSTIN contains only capital letters and digits.';
+  const stateCode = Number(value.slice(0, 2));
+  if (!/^\d{2}/.test(value) || !((stateCode >= 1 && stateCode <= 38) || stateCode === 97)) {
+    return 'The first two digits of a GSTIN are a state code from 01 to 38.';
+  }
+  if (!/^[A-Z]{5}\d{4}[A-Z]$/.test(value.slice(2, 12))) {
+    return 'Characters 3 to 12 of a GSTIN must be the business PAN, e.g. ABCPE1234F.';
+  }
+  if (!/^[1-9A-Z]$/.test(value[12])) {
+    return 'The 13th character of a GSTIN is the registration number (1–9 or A–Z).';
+  }
+  if (value[13] !== 'Z') return 'The 14th character of a GSTIN is always the letter Z.';
+  if (gstinCheckCharacter(value.slice(0, 14)) !== value[14]) {
+    return 'This GSTIN fails its checksum. Check for a mistyped character.';
+  }
+  return null;
+}
+
 /* ------------------------------------------------ Optional ID documents */
 
 export function validateVoterId(value: string): string | null {
