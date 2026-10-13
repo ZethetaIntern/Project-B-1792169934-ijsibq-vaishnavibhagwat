@@ -26,6 +26,8 @@ export interface UploadRules {
 export interface DocumentSpec extends UploadRules {
   id: DocumentTypeId;
   label: string;
+  /** The label as used mid-sentence ("Upload your bank statements"). */
+  noun: string;
   /** What exactly to upload, in plain words. */
   hint: string;
 }
@@ -39,6 +41,7 @@ export const DOCUMENT_SPECS: Readonly<Record<DocumentTypeId, DocumentSpec>> = {
   panCard: {
     id: 'panCard',
     label: 'PAN card',
+    noun: 'PAN card',
     hint: 'A clear copy of the front of your PAN card.',
     formats: ANY_FORMAT,
     maxSizeMb: 5,
@@ -47,6 +50,7 @@ export const DOCUMENT_SPECS: Readonly<Record<DocumentTypeId, DocumentSpec>> = {
   aadhaarCard: {
     id: 'aadhaarCard',
     label: 'Aadhaar card',
+    noun: 'Aadhaar card',
     hint: 'Front and back — two images, or one PDF with both sides.',
     formats: ANY_FORMAT,
     maxSizeMb: 5,
@@ -55,6 +59,7 @@ export const DOCUMENT_SPECS: Readonly<Record<DocumentTypeId, DocumentSpec>> = {
   salarySlips: {
     id: 'salarySlips',
     label: 'Salary slips',
+    noun: 'salary slips',
     hint: 'Your last 3 months — one PDF per month, or a single combined PDF.',
     formats: PDF_ONLY,
     maxSizeMb: 5,
@@ -63,6 +68,7 @@ export const DOCUMENT_SPECS: Readonly<Record<DocumentTypeId, DocumentSpec>> = {
   bankStatements: {
     id: 'bankStatements',
     label: 'Bank statements',
+    noun: 'bank statements',
     hint: 'Your last 6 months from the account your income is paid into.',
     formats: PDF_ONLY,
     maxSizeMb: 10,
@@ -71,6 +77,7 @@ export const DOCUMENT_SPECS: Readonly<Record<DocumentTypeId, DocumentSpec>> = {
   itr: {
     id: 'itr',
     label: 'Income tax returns',
+    noun: 'income tax returns',
     hint: 'ITR acknowledgements for the last 2 assessment years.',
     formats: PDF_ONLY,
     maxSizeMb: 5,
@@ -79,6 +86,7 @@ export const DOCUMENT_SPECS: Readonly<Record<DocumentTypeId, DocumentSpec>> = {
   propertyDocuments: {
     id: 'propertyDocuments',
     label: 'Property documents',
+    noun: 'property documents',
     hint: 'Sale agreement, allotment letter or title deed for the property.',
     formats: PDF_ONLY,
     maxSizeMb: 10,
@@ -87,6 +95,7 @@ export const DOCUMENT_SPECS: Readonly<Record<DocumentTypeId, DocumentSpec>> = {
   businessRegistration: {
     id: 'businessRegistration',
     label: 'Business registration certificate',
+    noun: 'business registration certificate',
     hint: 'Udyam, shop and establishment, partnership deed or incorporation certificate.',
     formats: PDF_ONLY,
     maxSizeMb: 5,
@@ -95,6 +104,7 @@ export const DOCUMENT_SPECS: Readonly<Record<DocumentTypeId, DocumentSpec>> = {
   gstReturns: {
     id: 'gstReturns',
     label: 'GST returns',
+    noun: 'GST returns',
     hint: 'GSTR-3B for the last 4 quarters — combine them into up to 3 PDFs.',
     formats: PDF_ONLY,
     maxSizeMb: 5,
@@ -103,6 +113,7 @@ export const DOCUMENT_SPECS: Readonly<Record<DocumentTypeId, DocumentSpec>> = {
   photograph: {
     id: 'photograph',
     label: 'Passport-size photograph',
+    noun: 'photograph',
     hint: 'A recent colour photo of your face on a plain background.',
     formats: IMAGE_ONLY,
     maxSizeMb: 2,
