@@ -49,10 +49,12 @@ function StepSkeleton() {
 }
 
 /** Runs `onMount` after the (lazy) step component has mounted. */
-function StepMountObserver({ onMount, children }: { onMount: () => void; children: ReactNode }) {
+function StepMountObserver({ stepId, onMount, children }: {
+  stepId: StepId; onMount: (stepId: StepId) => void; children: ReactNode;
+}) {
   useEffect(() => {
-    onMount();
-  }, [onMount]);
+    onMount(stepId);
+  }, [onMount, stepId]);
   return children;
 }
 
@@ -87,6 +89,8 @@ export function Wizard({ onSaveDraft }: WizardProps) {
   const focusOnMountRef = useRef(false);
   const fromHistoryRef = useRef(false);
   const [busy, setBusy] = useState(false);
+  // Continue only works once the step's (code-split) form has mounted and registered.
+  const [readyStepId, setReadyStepId] = useState<StepId | null>(null);
   const [announcement, setAnnouncement] = useState('');
 
   // The stored step can drop out of the flow (e.g. co-applicant no longer needed).
@@ -197,7 +201,8 @@ export function Wizard({ onSaveDraft }: WizardProps) {
     return () => window.removeEventListener('popstate', onPopState);
   }, [navigate, saveOpenStep]);
 
-  const handleStepMounted = useCallback(() => {
+  const handleStepMounted = useCallback((stepId: StepId) => {
+    setReadyStepId(stepId);
     // Marks the step as interactive (form subscriptions are live) — used by E2E tests.
     containerRef.current?.setAttribute('data-step-ready', 'true');
     if (!focusOnMountRef.current) return;
@@ -245,7 +250,7 @@ export function Wizard({ onSaveDraft }: WizardProps) {
             )}
             <Suspense fallback={<StepSkeleton />}>
               <WizardNavigationContext.Provider value={navigation}>
-                <StepMountObserver onMount={handleStepMounted}>
+                <StepMountObserver stepId={currentStepId} onMount={handleStepMounted}>
                   {stepElement}
                 </StepMountObserver>
               </WizardNavigationContext.Provider>
@@ -260,6 +265,7 @@ export function Wizard({ onSaveDraft }: WizardProps) {
         onBack={handleBack}
         showContinue={!isLast}
         busy={busy}
+        stepReady={readyStepId === currentStepId}
         continueLabel={continueLabel}
         continueShortLabel={continueShortLabel}
         onSaveDraft={onSaveDraft}
