@@ -73,7 +73,13 @@ export default [
   },
   {
     name: 'project/node-tooling',
-    files: ['*.config.{js,ts}', 'cypress/**/*.{js,ts}', 'scripts/**/*.{js,mjs}'],
+    files: [
+      '*.config.{js,ts}',
+      'cypress/**/*.{js,ts}',
+      'scripts/**/*.{js,mjs}',
+      'src/**/*.test.{ts,tsx}',
+      'src/test/**/*.{ts,tsx}',
+    ],
     languageOptions: {
       globals: { ...globals.node },
     },
