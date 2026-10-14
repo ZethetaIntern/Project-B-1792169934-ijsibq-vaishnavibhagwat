@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
+import { useDemoMode } from '../../demo/demoMode';
 import { navigateTo } from '../../hooks/useRoute';
 import { useApplicationStore } from '../../store/applicationStore';
 import type { LoanType } from '../../types/application';
@@ -24,6 +25,11 @@ interface LandingPageProps {
  */
 export function LandingPage({ secondaryAction }: LandingPageProps) {
   const updateSection = useApplicationStore((state) => state.updateSection);
+
+  // Coming back to the landing page ends any running demo.
+  useEffect(() => {
+    useDemoMode.getState().stop();
+  }, []);
 
   const start = () => navigateTo('apply');
   const startWith = (preset: Partial<LoanPreset> & { loanType: LoanType }) => {
