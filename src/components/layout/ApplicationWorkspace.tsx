@@ -28,6 +28,9 @@ import { Wizard } from '../wizard/Wizard';
 import { AppHeader } from './AppHeader';
 import { StepGuidance } from './StepGuidance';
 
+/** Live workspace count, so only a real unmount clears the store. */
+let mountedWorkspaces = 0;
+
 const timeLabel = (iso: string) => new Date(iso).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
 
 /**
@@ -112,8 +115,16 @@ export default function ApplicationWorkspace() {
   // Clear applicant data from memory when leaving the workspace (B4.4). A new
   // workspace may save drafts again even if the previous one ended in a submission.
   useEffect(() => {
+    mountedWorkspaces += 1;
     lockDrafts(false);
-    return () => useApplicationStore.getState().reset();
+    return () => {
+      mountedWorkspaces -= 1;
+      // Deferred: React StrictMode's simulated unmount/remount must not wipe the
+      // store (it would discard figures carried over from the landing calculator).
+      queueMicrotask(() => {
+        if (mountedWorkspaces === 0) useApplicationStore.getState().reset();
+      });
+    };
   }, []);
 
   const exit = async () => {
