@@ -1,9 +1,8 @@
 import { FlaskConical } from 'lucide-react';
 import { useId, useState } from 'react';
-import { clearLocalApplication, useDemoMode } from '../../demo/demoMode';
+import { useDemoMode } from '../../demo/demoMode';
 import { DEMO_SCENARIOS, type DemoScenarioId } from '../../demo/scenarios';
 import { navigateTo } from '../../hooks/useRoute';
-import { listDrafts } from '../../utils/draftStorage';
 import { Button } from '../common/Button';
 import { Callout } from '../common/Callout';
 import { Modal } from '../common/Modal';
@@ -24,12 +23,15 @@ export function DemoLauncher() {
   const [hasDraft, setHasDraft] = useState(false);
   const scenario = DEMO_SCENARIOS.find((item) => item.id === selected) ?? DEMO_SCENARIOS[0];
 
-  const openLauncher = () => {
-    setHasDraft(listDrafts().length > 0);
+  // Storage and encryption code loads on demand, keeping the landing page light.
+  const openLauncher = async () => {
     setOpen(true);
+    const { listDrafts } = await import('../../utils/draftStorage');
+    setHasDraft(listDrafts().length > 0);
   };
 
   const begin = async () => {
+    const { clearLocalApplication } = await import('../../demo/clearLocalApplication');
     await clearLocalApplication();
     start(selected);
     setOpen(false);

@@ -2,7 +2,8 @@ import {
   FlaskConical, ListChecks, LogOut, RotateCcw, Wand2,
 } from 'lucide-react';
 import { useId, useState } from 'react';
-import { clearLocalApplication, useDemoMode } from '../../demo/demoMode';
+import { clearLocalApplication } from '../../demo/clearLocalApplication';
+import { useDemoMode } from '../../demo/demoMode';
 import { fillDemoStep } from '../../demo/fillDemoStep';
 import { getDemoScenario } from '../../demo/scenarios';
 import { navigateTo } from '../../hooks/useRoute';
