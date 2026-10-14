@@ -1,7 +1,7 @@
 {
   "name": "lendswift-loan-application",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Eight-step digital loan application for Personal, Home and Business loans with validation, KYC simulation, document upload, e-signature and encrypted auto-save.",
   "type": "module",
   "scripts": {
