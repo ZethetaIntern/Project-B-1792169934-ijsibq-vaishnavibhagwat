@@ -135,14 +135,27 @@ Custom commands (`cypress/support/commands.js`) include `fillStep1` … `fillSte
 
 ## Performance and accessibility
 
-- Main JavaScript chunk about 69 KB gzipped; each step, the workspace and jsPDF are separate
-  chunks.
+Lighthouse 12, mobile profile with simulated slow 4G, production build, median of three runs:
+
+| Page | Performance | Accessibility | Best practices | SEO | LCP | CLS |
+| --- | --- | --- | --- | --- | --- | --- |
+| Landing (`/`) | 92 | 100 | 100 | 100 | 2.4 s | 0.035 |
+| Application (`/apply`) | 80 | 100 | 100 | 100 | 3.5 s | 0 |
+
+- Main JavaScript chunk about 86 KB gzipped (well under the 300 KB budget). Each step, the
+  workspace, the storage and encryption code, and jsPDF are separate chunks loaded on demand.
+- `/apply` loads the workspace and then the step, so on a slow connection it pays two extra
+  round trips; preloading both in parallel was measured and made it *worse* (more blocking
+  time), so it was left out.
 - Five 4.1 MB photos uploaded together (measured in Chrome, development build): longest
   main-thread task 181 ms, JS heap back to its 33 MB baseline afterwards.
 - WCAG 2.1 AA: labels on every control, "Optional" in text, errors after interaction in polite
-  live regions, focus moved to each new step and to the first invalid field, 44 px touch
-  targets on phones, no horizontal scroll at 320 px, `prefers-reduced-motion` respected, and
-  axe checks on every screen in CI.
+  live regions, focus moved to each new step and to the first invalid field, and axe checks on
+  every screen in the E2E suite.
+- Responsive audit (landing page and all eight steps at 320, 375, 414, 640, 768, 1024, 1440
+  and 1920 px): no horizontal scrolling, also with a 24 px base font. Every control is at
+  least 24 × 24 px, and controls that are hard to hit on phones (progress steps, links,
+  submit blockers) are 44 px tall below 640 px.
 
 ## Screenshots
 
