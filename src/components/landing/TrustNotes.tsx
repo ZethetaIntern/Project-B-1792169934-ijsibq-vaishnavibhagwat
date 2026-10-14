@@ -21,7 +21,7 @@ const NOTES = [
 /** How applicant data is handled, stated plainly — including what is simulated. */
 export function TrustNotes() {
   return (
-    <section aria-labelledby="trust-title" className="rounded-panel border border-line bg-surface p-6 sm:p-10">
+    <section id="privacy" aria-labelledby="trust-title" className="scroll-mt-28 rounded-panel border border-line bg-surface p-6 sm:p-10">
       <h2 id="trust-title" className="max-w-xl text-[24px] leading-tight font-semibold tracking-[-0.02em] text-ink sm:text-[28px]">
         What happens to your information
       </h2>
