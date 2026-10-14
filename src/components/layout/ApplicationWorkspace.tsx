@@ -18,6 +18,7 @@ import { lockDrafts } from '../../utils/draftStorage';
 import { Button } from '../common/Button';
 import { Callout } from '../common/Callout';
 import { Modal } from '../common/Modal';
+import { DemoBar } from '../demo/DemoBar';
 import { useToast } from '../common/Toast';
 import { AutosaveStatus } from '../persistence/AutosaveStatus';
 import { ResumeDraftModal } from '../persistence/ResumeDraftModal';
@@ -149,6 +150,7 @@ export default function ApplicationWorkspace() {
       />
       <div className="mx-auto grid max-w-6xl gap-8 px-4 pt-6 pb-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-10 lg:pt-10">
         <main id="main-content" className="min-w-0">
+          <DemoBar />
           <div className="mb-5 flex flex-col gap-3 empty:hidden">
             {!online && (
               <Callout role="status" tone="warning" title="You're offline">

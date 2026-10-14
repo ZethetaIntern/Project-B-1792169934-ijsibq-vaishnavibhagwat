@@ -1,4 +1,7 @@
 import { create } from 'zustand';
+import { useApplicationStore } from '../store/applicationStore';
+import { clearVault } from '../utils/documentVault';
+import { deleteAllDrafts } from '../utils/draftStorage';
 import { getDemoScenario, type DemoScenarioId } from './scenarios';
 
 /** Session-only (not PII): which demo is running, so a reload stays in demo mode. */
@@ -39,3 +42,10 @@ export const useDemoMode = create<DemoModeState>()((set) => ({
     set({ scenarioId: null });
   },
 }));
+
+/** Removes every answer, saved draft and stored file, so a demo starts (or ends) clean. */
+export async function clearLocalApplication(): Promise<void> {
+  deleteAllDrafts();
+  useApplicationStore.getState().reset();
+  await clearVault().catch(() => undefined);
+}
