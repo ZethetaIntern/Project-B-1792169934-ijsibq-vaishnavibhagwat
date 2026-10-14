@@ -100,4 +100,17 @@ export default [
       'import-x/no-extraneous-dependencies': ['error', { devDependencies: true }],
     },
   },
+  {
+    name: 'project/cypress',
+    files: ['cypress/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.mocha,
+        cy: 'readonly',
+        Cypress: 'readonly',
+        expect: 'readonly',
+      },
+    },
+  },
 ];

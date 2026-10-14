@@ -1,0 +1,35 @@
+{
+  "loan": { "type": "Personal Loan", "amount": "300000", "tenureMonths": "36", "purpose": "medical" },
+  "personal": {
+    "fullName": "Meera Iyer",
+    "dateOfBirth": "1994-06-12",
+    "gender": "Female",
+    "maritalStatus": "single",
+    "fatherName": "Suresh Iyer",
+    "motherName": "Lakshmi Iyer",
+    "email": "meera.iyer@example.com",
+    "mobile": "9000012345"
+  },
+  "kyc": { "pan": "AMBPI4821K", "aadhaar": "392718465026" },
+  "address": {
+    "line1": "12, Lakeview Apartments, Usman Road",
+    "pinCode": "600017",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "residenceType": "owned",
+    "years": "4"
+  },
+  "employment": {
+    "type": "Salaried",
+    "companyName": "Tata Consultancy Services",
+    "designation": "Business Analyst",
+    "monthlySalary": "85000",
+    "yearsOfExperience": "7"
+  },
+  "documents": {
+    "aadhaarCard": "sample.pdf",
+    "salarySlips": "sample.pdf",
+    "bankStatements": "sample.pdf",
+    "photograph": "photo.jpg"
+  }
+}

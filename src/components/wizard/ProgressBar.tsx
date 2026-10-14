@@ -50,7 +50,6 @@ export function ProgressBar({
                 type="button"
                 disabled={state === 'locked'}
                 aria-current={state === 'current' ? 'step' : undefined}
-                aria-label={`Step ${index + 1}: ${step.title}, ${STATE_LABEL[state]}`}
                 onClick={() => clickable && onSelect(step.id)}
                 className={cn(
                   'group flex w-full flex-col gap-2 rounded-md py-2 text-left disabled:cursor-not-allowed',
@@ -78,10 +77,12 @@ export function ProgressBar({
                   {state === 'complete' ? (
                     <Check aria-hidden="true" className="size-3.5 shrink-0 text-success-ink" strokeWidth={3} />
                   ) : (
-                    <span aria-hidden="true" className="tabular">{index + 1}</span>
+                    <span className="tabular">{index + 1}</span>
                   )}
                   <span className="truncate">{step.shortTitle}</span>
                 </span>
+                {/* Accessible name = visible label first (WCAG 2.5.3), then context. */}
+                <span className="sr-only">{` Step ${index + 1}: ${step.title}, ${STATE_LABEL[state]}`}</span>
               </button>
             </li>
           );
