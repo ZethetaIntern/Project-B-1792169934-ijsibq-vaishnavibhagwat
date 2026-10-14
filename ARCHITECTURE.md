@@ -20,7 +20,7 @@ Landing page (Experience A)                 Application workspace (Experience B)
 ```
 
 - **React 19 + TypeScript + Vite.** Steps are code-split with `lazy()`, so only the open
-  step's code is downloaded; the main chunk is about 69 KB gzipped.
+  step's code is downloaded; the main chunk is about 86 KB gzipped.
 - **React Hook Form** owns in-progress field state for the open step only.
 - **Zod** owns every rule. One schema per step, rebuilt from the whole application.
 - **Zustand** holds the application between steps, so Back never loses data.

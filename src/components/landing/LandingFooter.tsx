@@ -8,7 +8,7 @@ function FooterLink({ href, children, external = false }: {
     <a
       href={href}
       {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-      className="text-sm text-slate underline-offset-4 hover:text-ink hover:underline"
+      className="inline-flex min-h-11 items-center text-sm text-slate underline-offset-4 hover:text-ink hover:underline sm:min-h-6"
     >
       {children}
       {external && <span className="sr-only"> (opens in a new tab)</span>}
@@ -29,13 +29,13 @@ export function LandingFooter() {
             Interest rates and figures are illustrative.
           </p>
         </div>
-        <nav aria-label="Support" className="flex flex-col gap-3">
+        <nav aria-label="Support" className="flex flex-col sm:gap-2">
           <h2 className="text-sm font-semibold text-ink">Support</h2>
           <FooterLink href="#help">Help and questions</FooterLink>
           <FooterLink href="mailto:help@lendswift.example">help@lendswift.example</FooterLink>
           <FooterLink href="#privacy">How we handle your information</FooterLink>
         </nav>
-        <nav aria-label="Legal" className="flex flex-col gap-3">
+        <nav aria-label="Legal" className="flex flex-col sm:gap-2">
           <h2 className="text-sm font-semibold text-ink">Legal</h2>
           <FooterLink href="/lendswift-terms-and-conditions.pdf" external>Terms and conditions (PDF)</FooterLink>
           <FooterLink href="mailto:grievance@lendswift.example">Grievance redressal officer</FooterLink>

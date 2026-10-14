@@ -63,7 +63,7 @@ export function StepNavigation({
             disabled={!stepReady}
             loadingText="Checking…"
             trailingIcon={<ArrowRight aria-hidden="true" className="size-4" />}
-            className="min-w-36"
+            className="sm:min-w-36"
           >
             <span className="sm:hidden">{continueShortLabel}</span>
             <span className="max-sm:hidden">{continueLabel}</span>

@@ -42,7 +42,7 @@ export function SubmitPanel({
                     <button
                       type="button"
                       onClick={() => goTo(stepId, { fromReview: true })}
-                      className="cursor-pointer text-left text-cobalt underline-offset-4 hover:underline"
+                      className="inline-flex min-h-11 cursor-pointer items-center text-left text-cobalt underline-offset-4 hover:underline sm:min-h-6"
                     >
                       {message}
                     </button>

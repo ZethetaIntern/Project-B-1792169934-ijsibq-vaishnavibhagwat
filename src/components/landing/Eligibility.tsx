@@ -1,6 +1,12 @@
 import { Check, FileText } from 'lucide-react';
-import { MAX_APPLICANT_AGE, MAX_AGE_AT_MATURITY, MIN_APPLICANT_AGE } from '../../constants/loan';
-import { MIN_ANNUAL_TURNOVER, MIN_MONTHLY_SALARY, MIN_YEARS_IN_BUSINESS } from '../../schemas/step5Schema';
+import {
+  MAX_AGE_AT_MATURITY,
+  MAX_APPLICANT_AGE,
+  MIN_ANNUAL_TURNOVER,
+  MIN_APPLICANT_AGE,
+  MIN_MONTHLY_SALARY,
+  MIN_YEARS_IN_BUSINESS,
+} from '../../constants/loan';
 import { formatCompactINR, formatINR } from '../../utils/format';
 
 const CRITERIA = [

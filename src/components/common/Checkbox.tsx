@@ -52,7 +52,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((
           variant === 'card' && error && 'border-danger-ink',
         )}
       >
-        <span className="relative z-10 mt-0.5 flex size-5 shrink-0 items-center justify-center">
+        <span className="relative z-10 flex size-6 shrink-0 items-center justify-center">
           <input
             {...inputProps}
             ref={ref}
@@ -61,7 +61,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((
             aria-invalid={error ? true : undefined}
             aria-describedby={describedBy || undefined}
             className={cn(
-              'peer size-5 cursor-pointer appearance-none rounded-[6px] border border-line-strong bg-surface transition-colors',
+              'peer size-6 cursor-pointer appearance-none rounded-[6px] border border-line-strong bg-surface transition-colors',
               'checked:border-brand checked:bg-brand',
               'hover:border-ink-soft/70',
               'focus-visible:shadow-focus focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt',

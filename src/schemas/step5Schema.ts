@@ -2,12 +2,13 @@ import { z } from 'zod';
 import type { ApplicationData } from '../types/application';
 import { formatINR } from '../utils/format';
 import { validateGstin } from '../utils/validators';
+import {
+  MIN_ANNUAL_TURNOVER, MIN_MONTHLY_SALARY, MIN_YEARS_IN_BUSINESS,
+} from '../constants/loan';
 import { addressShape, checkAddress } from './addressSchema';
 import { fail, optionalNumber, text } from './common';
 
-export const MIN_MONTHLY_SALARY = 15_000;
-export const MIN_ANNUAL_TURNOVER = 3_00_000;
-export const MIN_YEARS_IN_BUSINESS = 2;
+export { MIN_ANNUAL_TURNOVER, MIN_MONTHLY_SALARY, MIN_YEARS_IN_BUSINESS } from '../constants/loan';
 
 export const BUSINESS_TYPES = [
   { value: 'manufacturing', label: 'Manufacturing' },

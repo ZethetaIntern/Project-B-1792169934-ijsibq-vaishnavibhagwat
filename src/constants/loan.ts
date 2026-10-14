@@ -24,6 +24,11 @@ export const MAX_PROCESSING_FEE = 25_000;
 /** EMI may not exceed 50% of (applicant + co-applicant) monthly income without extra consent. */
 export const MAX_EMI_TO_INCOME_RATIO = 0.5;
 
+/** Eligibility minimums checked on Step 5 and listed on the landing page. */
+export const MIN_MONTHLY_SALARY = 15_000;
+export const MIN_ANNUAL_TURNOVER = 3_00_000;
+export const MIN_YEARS_IN_BUSINESS = 2;
+
 /** Passport field appears only for Home Loans above ₹50 lakh. */
 export const PASSPORT_REQUIRED_HOME_LOAN_AMOUNT = 50_00_000;
 

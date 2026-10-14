@@ -52,7 +52,7 @@ export function ProgressBar({
                 aria-current={state === 'current' ? 'step' : undefined}
                 onClick={() => clickable && onSelect(step.id)}
                 className={cn(
-                  'group flex w-full flex-col gap-2 rounded-md py-2 text-left disabled:cursor-not-allowed',
+                  'group flex min-h-11 w-full flex-col justify-center gap-2 rounded-md py-2 text-left disabled:cursor-not-allowed lg:min-h-0',
                   clickable ? 'cursor-pointer' : 'cursor-default',
                 )}
               >

@@ -86,7 +86,7 @@ export function DocumentChecklist({ requirements, files, signed }: DocumentCheck
           style={{ width: `${(ready / Math.max(required.length, 1)) * 100}%` }}
         />
       </div>
-      <ul className="mt-4 grid gap-x-6 gap-y-1 sm:grid-cols-2">
+      <ul className="mt-4 grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2">
         {rows.map((row) => (
           <li key={row.id}>
             <button
