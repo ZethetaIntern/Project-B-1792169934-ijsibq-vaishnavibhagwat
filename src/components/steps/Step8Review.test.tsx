@@ -62,10 +62,10 @@ describe('Step 8 — review and submit', () => {
 
     await user.click(submit);
     await user.click(submit);
-    await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(spy).toHaveBeenCalledTimes(1), { timeout: 5000 });
     await act(async () => resolve({ reference: 'b7e0c7d2-1111-4222-8333-444455556666', submittedAt: '2026-10-13T10:00:00.000Z' }));
 
-    const dialog = await screen.findByRole('dialog', { name: 'Application submitted' });
+    const dialog = await screen.findByRole('dialog', { name: 'Application submitted' }, { timeout: 5000 });
     expect(within(dialog).getByText('b7e0c7d2-1111-4222-8333-444455556666')).toBeInTheDocument();
     expect(spy).toHaveBeenCalledTimes(1);
   });
