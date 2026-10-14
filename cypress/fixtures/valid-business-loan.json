@@ -1,0 +1,42 @@
+{
+  "loan": { "type": "Business Loan", "amount": "1500000", "tenureMonths": "60", "purpose": "equipment" },
+  "personal": {
+    "fullName": "Kabir Malhotra",
+    "dateOfBirth": "1985-09-03",
+    "gender": "Male",
+    "maritalStatus": "single",
+    "fatherName": "Vinod Malhotra",
+    "motherName": "Neelam Malhotra",
+    "email": "kabir.malhotra@example.com",
+    "mobile": "9000034567"
+  },
+  "kyc": { "pan": "DKMPM2468R", "aadhaar": "571203849655" },
+  "address": {
+    "line1": "House 41, Sector 22-B",
+    "pinCode": "160022",
+    "city": "Chandigarh",
+    "state": "Chandigarh",
+    "residenceType": "owned",
+    "years": "6"
+  },
+  "employment": {
+    "type": "Business owner",
+    "businessName": "Malhotra Precision Components",
+    "businessType": "Manufacturing",
+    "annualTurnover": "12000000",
+    "yearsInBusiness": "9",
+    "monthlyIncome": "220000",
+    "gstNumber": "04DKMPM2468R1ZC",
+    "officeLine1": "SCO 88, Sector 17-C",
+    "officePinCode": "160017",
+    "yearsOfExperience": "14"
+  },
+  "documents": {
+    "aadhaarCard": "sample.pdf",
+    "bankStatements": "sample.pdf",
+    "itr": "sample.pdf",
+    "businessRegistration": "sample.pdf",
+    "gstReturns": "sample.pdf",
+    "photograph": "photo.jpg"
+  }
+}

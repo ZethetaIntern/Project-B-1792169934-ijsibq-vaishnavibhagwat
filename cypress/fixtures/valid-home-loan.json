@@ -1,0 +1,43 @@
+{
+  "loan": { "type": "Home Loan", "amount": "6000000", "tenureMonths": "240", "purpose": "ready-property" },
+  "personal": {
+    "fullName": "Rohan Kulkarni",
+    "dateOfBirth": "1988-02-21",
+    "gender": "Male",
+    "maritalStatus": "married",
+    "fatherName": "Anil Kulkarni",
+    "motherName": "Sunanda Kulkarni",
+    "email": "rohan.kulkarni@example.com",
+    "mobile": "9000023456"
+  },
+  "kyc": { "pan": "BKLPK7310M", "aadhaar": "483029176544", "passport": "Z1234567" },
+  "address": {
+    "line1": "Flat 703, Sunrise Towers, FC Road",
+    "pinCode": "411001",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "residenceType": "rented",
+    "rent": "25000",
+    "years": "3"
+  },
+  "employment": {
+    "type": "Salaried",
+    "companyName": "Infosys",
+    "designation": "Engineering Manager",
+    "monthlySalary": "140000",
+    "yearsOfExperience": "12"
+  },
+  "coApplicant": {
+    "fullName": "Priya Kulkarni",
+    "relationship": "spouse",
+    "pan": "CPRPK5520Q",
+    "monthlyIncome": "70000"
+  },
+  "documents": {
+    "aadhaarCard": "sample.pdf",
+    "salarySlips": "sample.pdf",
+    "bankStatements": "sample.pdf",
+    "propertyDocuments": "sample.pdf",
+    "photograph": "photo.jpg"
+  }
+}
