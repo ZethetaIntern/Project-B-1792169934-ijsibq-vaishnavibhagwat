@@ -57,15 +57,16 @@ Cypress.Commands.add('drawSignature', (groupLabel) => {
   cy.contains('[role="group"]', groupLabel).within(() => {
     cy.get('[data-testid="signature-canvas"]').scrollIntoView().then(($canvas) => {
       const rect = $canvas[0].getBoundingClientRect();
-      const point = (x, y) => ({
-        clientX: rect.left + x, clientY: rect.top + y, pointerId: 1, isPrimary: true, buttons: 1, pressure: 0.5, pointerType: 'mouse',
+      // `buttons` is 1 while the pen is down and 0 on release, as in a real browser.
+      const point = (x, y, buttons = 1) => ({
+        eventConstructor: 'PointerEvent', clientX: rect.left + x, clientY: rect.top + y, pointerId: 1, isPrimary: true, button: 0, buttons, pressure: buttons ? 0.5 : 0, pointerType: 'mouse',
       });
       cy.wrap($canvas)
         .trigger('pointerdown', point(30, 60))
         .trigger('pointermove', point(90, 30))
         .trigger('pointermove', point(160, 90))
         .trigger('pointermove', point(240, 40))
-        .trigger('pointerup', point(240, 40));
+        .trigger('pointerup', point(240, 40, 0));
     });
   });
 });
@@ -92,7 +93,10 @@ Cypress.Commands.add('verifyMobileWithOtp', () => {
     cy.get('input[autocomplete="one-time-code"]').type(code.trim());
   });
   cy.contains('button', 'Verify code').click();
-  cy.contains('button', 'Verify code', { timeout: 6000 }).should('not.exist');
+  // The button reads "Checking…" while the (simulated) check runs; the code panel
+  // only disappears once the number is verified.
+  cy.get('input[autocomplete="one-time-code"]', { timeout: 6000 }).should('not.exist');
+  cy.get('[name="mobile"]').should('not.have.attr', 'aria-invalid', 'true');
 });
 
 // ---- Step fillers (cypress/fixtures/valid-*.json) ----
@@ -195,6 +199,25 @@ Cypress.Commands.add('fillStep8', () => {
   cy.waitForStep('Review and submit');
   [/true, complete and accurate/, /get my credit report/, /I have read and agree/, /receive updates/]
     .forEach((label) => cy.tickConsent(label));
+});
+
+/** Fills Steps 1–6 (as applicable) and stops on the documents step. */
+Cypress.Commands.add('reachDocumentsStep', (data) => {
+  cy.fillStep1(data.loan);
+  cy.continueStep();
+  cy.fillStep2(data.personal);
+  cy.continueStep();
+  cy.fillStep3(data.kyc);
+  cy.continueStep();
+  cy.fillStep4(data.address);
+  cy.continueStep();
+  cy.fillStep5(data.employment);
+  cy.continueStep();
+  if (data.coApplicant) {
+    cy.fillStep6(data.coApplicant);
+    cy.continueStep();
+  }
+  cy.waitForStep('Documents and signature');
 });
 
 /** Walks a complete application from Step 1 to the review page. */
