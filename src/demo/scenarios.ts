@@ -44,7 +44,7 @@ function personalSalaried(): ApplicationData {
     ...data.personal, fullName: 'Meera Iyer', dateOfBirth: '1994-06-12', mobile: '9000012345',
   };
   data.kyc = { ...data.kyc, pan: 'AMBPI4821K', aadhaar: aadhaar('39271846502') };
-  data.address.current = address('12, Lakeview Apartments, Anna Nagar', '600040', 'Chennai', 'Tamil Nadu');
+  data.address.current = address('12, Lakeview Apartments, Usman Road, T Nagar', '600017', 'Chennai', 'Tamil Nadu');
   data.employment = {
     ...data.employment,
     employmentType: 'salaried',
@@ -69,7 +69,7 @@ function homeJoint(): ApplicationData {
   };
   data.address = {
     ...data.address,
-    current: address('Flat 703, Sunrise Towers, Baner Road', '411045', 'Pune', 'Maharashtra'),
+    current: address('Flat 703, Sunrise Towers, FC Road', '411001', 'Pune', 'Maharashtra'),
     residenceType: 'rented',
     monthlyRent: 25_000,
   };
@@ -98,9 +98,9 @@ function businessOwner(): ApplicationData {
   data.kyc = { ...data.kyc, pan: 'DKMPM2468R', aadhaar: aadhaar('57120384965') };
   data.address = {
     ...data.address,
-    current: address('House 41, Sector 15', '160015', 'Chandigarh', 'Chandigarh'),
+    current: address('House 41, Sector 22-B', '160022', 'Chandigarh', 'Chandigarh'),
     yearsAtCurrentAddress: 0,
-    previous: address('22, Model Town Extension', '141002', 'Ludhiana', 'Punjab'),
+    previous: address('22, Model Town Extension', '141001', 'Ludhiana', 'Punjab'),
   };
   data.employment = {
     ...data.employment,
@@ -111,7 +111,7 @@ function businessOwner(): ApplicationData {
     annualTurnover: 1_20_00_000,
     yearsInBusiness: 9,
     monthlyIncome: 2_20_000,
-    officeAddress: address('Plot 88, Industrial Area Phase 2', '160002', 'Chandigarh', 'Chandigarh'),
+    officeAddress: address('SCO 88, Sector 17-C', '160017', 'Chandigarh', 'Chandigarh'),
     gstNumber: `04DKMPM2468R1Z${gstinCheckCharacter('04DKMPM2468R1Z')}`,
   };
   data.coApplicant = {
@@ -129,7 +129,7 @@ function personalHighEmi(): ApplicationData {
     ...data.personal, fullName: 'Anjali Deshmukh', dateOfBirth: '1990-11-30', fatherName: 'Prakash Deshmukh', motherName: 'Shobha Deshmukh', mobile: '9000045678',
   };
   data.kyc = { ...data.kyc, pan: 'FADPD3579H', aadhaar: aadhaar('62859301746') };
-  data.address.current = address('B-9, Shivaji Colony, Dharampeth', '440010', 'Nagpur', 'Maharashtra');
+  data.address.current = address('B-9, Shivaji Colony, Sitabuldi', '440001', 'Nagpur', 'Maharashtra');
   data.employment = {
     ...data.employment,
     employmentType: 'selfEmployed',
@@ -139,7 +139,7 @@ function personalHighEmi(): ApplicationData {
     annualTurnover: 6_00_000,
     yearsInBusiness: 4,
     monthlyIncome: 40_000,
-    officeAddress: address('First floor, 14 Ramdaspeth Road', '440010', 'Nagpur', 'Maharashtra'),
+    officeAddress: address('First floor, 14 Central Avenue', '440001', 'Nagpur', 'Maharashtra'),
   };
   data.coApplicant = {
     ...data.coApplicant, fullName: 'Prakash Deshmukh', relationship: 'parent', pan: 'GPDPD8642L', monthlyIncome: 8_000,
