@@ -28,7 +28,7 @@ describe('Cross-step dependencies', () => {
 
   it('Journey 15 · raising the amount after reaching Step 5 inserts the co-applicant step', () => {
     cy.completeApplication(data);
-    cy.get('button[aria-label^="Step 1: Choose your loan"]').click();
+    cy.contains('nav[aria-label^="Application progress"] button', 'Step 1: Choose your loan').click();
     cy.waitForStep('Choose your loan');
     cy.typeInto('loanAmount', '800000');
     cy.continueStep();
@@ -36,7 +36,7 @@ describe('Cross-step dependencies', () => {
     // Earlier answers are kept — every step up to income is still complete.
     cy.waitForStep('About you');
     cy.get('[name="fullName"]').should('have.value', data.personal.fullName);
-    cy.get('button[aria-label^="Step 5: Work and income"]').click();
+    cy.contains('nav[aria-label^="Application progress"] button', 'Step 5: Work and income').click();
     cy.waitForStep('Work and income');
     cy.continueStep();
     cy.waitForStep('Add a co-applicant');
@@ -45,7 +45,7 @@ describe('Cross-step dependencies', () => {
 
   it('Journey 15 · switching to a Business Loan sends a salaried applicant back to Step 5', () => {
     cy.completeApplication(data);
-    cy.get('button[aria-label^="Step 1: Choose your loan"]').click();
+    cy.contains('nav[aria-label^="Application progress"] button', 'Step 1: Choose your loan').click();
     cy.contains('label', 'Business Loan').click();
     cy.typeInto('loanAmount', '1500000');
     cy.get('[name="tenureMonths"]').select('60');
@@ -53,7 +53,7 @@ describe('Cross-step dependencies', () => {
     cy.continueStep();
 
     // Step 2 onwards are still valid; employment now fails the Business Loan rule.
-    cy.get('button[aria-label^="Step 5: Work and income"]').click();
+    cy.contains('nav[aria-label^="Application progress"] button', 'Step 5: Work and income').click();
     cy.continueStep();
     cy.contains('Business Loans are for the self-employed and business owners.').should('be.visible');
   });
