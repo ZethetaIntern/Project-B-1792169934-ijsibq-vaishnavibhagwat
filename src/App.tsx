@@ -1,27 +1,10 @@
 import { lazy, Suspense } from 'react';
 import { ToastProvider } from './components/common/Toast';
 import { Spinner } from './components/common/Spinner';
-import { navigateTo, useRoute } from './hooks/useRoute';
+import { LandingPage } from './components/landing/LandingPage';
+import { useRoute } from './hooks/useRoute';
 
 const ApplicationWorkspace = lazy(() => import('./components/layout/ApplicationWorkspace'));
-
-function LandingPlaceholder() {
-  return (
-    <main id="main-content" className="mx-auto flex min-h-dvh max-w-3xl flex-col justify-center gap-4 px-4">
-      <h1 className="text-4xl font-semibold tracking-tight text-ink">LendSwift</h1>
-      <p className="text-slate">Apply for a Personal, Home or Business loan in eight guided steps.</p>
-      <div>
-        <button
-          type="button"
-          onClick={() => navigateTo('apply')}
-          className="h-11 rounded-field bg-brand px-5 font-medium text-white"
-        >
-          Start your application
-        </button>
-      </div>
-    </main>
-  );
-}
 
 function RouteFallback() {
   return (
@@ -42,7 +25,7 @@ function App() {
         Skip to main content
       </a>
       <Suspense fallback={<RouteFallback />}>
-        {route === 'apply' ? <ApplicationWorkspace /> : <LandingPlaceholder />}
+        {route === 'apply' ? <ApplicationWorkspace /> : <LandingPage />}
       </Suspense>
     </ToastProvider>
   );
