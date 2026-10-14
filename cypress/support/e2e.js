@@ -1,4 +1,5 @@
 import 'cypress-axe';
+import 'cypress-real-events';
 import './commands';
 
 // Every test starts without drafts or a running demo. Stored files (IndexedDB)

@@ -46,6 +46,7 @@
     "axe-core": "^4.14.0",
     "cypress": "^15.21.1",
     "cypress-axe": "^1.7.0",
+    "cypress-real-events": "^1.15.1",
     "eslint": "^9.39.5",
     "eslint-config-airbnb-extended": "^3.3.0",
     "fake-indexeddb": "^6.2.5",
