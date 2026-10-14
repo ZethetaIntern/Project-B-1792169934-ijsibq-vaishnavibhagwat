@@ -12,6 +12,10 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     css: false,
     restoreMocks: true,
+    // Integration tests load code-split steps; give them room on slower machines and
+    // under coverage instrumentation, and avoid starving workers on small CPUs.
+    testTimeout: 15_000,
+    maxWorkers: 2,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'json-summary'],
