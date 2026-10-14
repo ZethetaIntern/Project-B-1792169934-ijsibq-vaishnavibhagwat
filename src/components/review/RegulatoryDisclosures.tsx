@@ -50,7 +50,7 @@ export function RegulatoryDisclosures() {
             href="https://cms.rbi.org.in"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex w-fit items-center gap-1 font-medium text-cobalt underline-offset-4 hover:underline"
+            className="inline-flex min-h-11 w-fit items-center gap-1 font-medium text-cobalt underline-offset-4 hover:underline sm:min-h-6"
           >
             cms.rbi.org.in
             <ExternalLink aria-hidden="true" className="size-3.5" />
