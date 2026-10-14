@@ -20,6 +20,7 @@ import {
   getReturnToReviewTarget,
   resolveActiveStepId,
 } from '../../utils/wizardNavigation';
+import { LoadErrorBoundary } from '../common/LoadErrorBoundary';
 import { ProgressBar } from './ProgressBar';
 import { stepFormBridge } from './stepFormBridge';
 import { StepNavigation } from './StepNavigation';
@@ -248,13 +249,15 @@ export function Wizard({ onSaveDraft }: WizardProps) {
             {currentStepId !== 'review' && (
               <p className="mb-6 text-[13px] text-slate">All fields are required unless marked Optional.</p>
             )}
-            <Suspense fallback={<StepSkeleton />}>
-              <WizardNavigationContext.Provider value={navigation}>
-                <StepMountObserver stepId={currentStepId} onMount={handleStepMounted}>
-                  {stepElement}
-                </StepMountObserver>
-              </WizardNavigationContext.Provider>
-            </Suspense>
+            <LoadErrorBoundary key={currentStepId} title="This step did not load">
+              <Suspense fallback={<StepSkeleton />}>
+                <WizardNavigationContext.Provider value={navigation}>
+                  <StepMountObserver stepId={currentStepId} onMount={handleStepMounted}>
+                    {stepElement}
+                  </StepMountObserver>
+                </WizardNavigationContext.Provider>
+              </Suspense>
+            </LoadErrorBoundary>
           </div>
         </form>
       </div>
