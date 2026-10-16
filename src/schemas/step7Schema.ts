@@ -43,8 +43,11 @@ export function buildStep7Schema(application: ApplicationData) {
   }));
 }
 
-/** Ids of every file the application still references (vault pruning). */
+/**
+ * Ids of every file the application still references (vault pruning). Unvalidated
+ * form values (saved by Back or a jump) list an empty uploader as `undefined`.
+ */
 export function getReferencedFileIds(application: ApplicationData): Set<string> {
-  const documentFiles = Object.values(application.documents.files).flat();
+  const documentFiles = Object.values(application.documents.files).flatMap((files) => files ?? []);
   return new Set([...documentFiles, ...application.address.addressProof].map((file) => file.id));
 }

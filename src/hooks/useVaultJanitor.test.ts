@@ -42,6 +42,19 @@ describe('useVaultJanitor', () => {
     expect(await hasFile('statement')).toBe(true);
   });
 
+  it('tolerates an empty uploader saved without validation (Back from Step 7)', async () => {
+    renderHook(() => useVaultJanitor());
+    const { documents } = useApplicationStore.getState().data;
+    // Unvalidated form values list a registered-but-empty uploader as `undefined`.
+    const files = { ...documents.files, panCard: undefined } as typeof documents.files;
+    expect(() => useApplicationStore.getState().replaceSection('documents', { ...documents, files }))
+      .not.toThrow();
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    expect(await hasFile('slip')).toBe(true);
+  });
+
   it('keeps files when the store is reset or hydrated', async () => {
     renderHook(() => useVaultJanitor());
     useApplicationStore.getState().reset();
