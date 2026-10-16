@@ -163,3 +163,10 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Safari < 15.4 and Chrome < 108 have no dynamic viewport units: use 100vh there. */
+@supports not (min-height: 100dvh) {
+  .min-h-dvh {
+    min-height: 100vh;
+  }
+}
