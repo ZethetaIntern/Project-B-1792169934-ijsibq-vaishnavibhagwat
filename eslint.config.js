@@ -1,6 +1,7 @@
 // @ts-check
 import js from '@eslint/js';
 import { configs, plugins } from 'eslint-config-airbnb-extended';
+import compat from 'eslint-plugin-compat';
 import globals from 'globals';
 
 /**
@@ -47,6 +48,14 @@ export default [
   ...javascriptConfig,
   ...reactConfig,
   ...typescriptConfig,
+  {
+    // Flags browser APIs missing from the brief's minimum browsers (package.json
+    // "browserslist": Chrome/Edge 90, Firefox 88, Safari 14).
+    ...compat.configs['flat/recommended'],
+    name: 'project/browser-compat',
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/**/*.test.{ts,tsx}', 'src/test/**'],
+  },
   {
     name: 'project/browser-globals',
     languageOptions: {
