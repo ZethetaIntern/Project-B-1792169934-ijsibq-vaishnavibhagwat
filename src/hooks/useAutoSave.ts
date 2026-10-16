@@ -4,6 +4,7 @@ import {
 import { AUTOSAVE_INTERVAL_MS } from '../constants/persistence';
 import { saveDraft, type DraftSummary } from '../utils/draftStorage';
 import type { ApplicationSnapshot } from '../store/applicationStore';
+import { AUTOSAVE_WRITE, endSpan, startSpan } from '../utils/userTiming';
 
 export type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -72,11 +73,13 @@ export function useAutoSave(
 
     setStatus('saving');
     const started = performance.now();
+    startSpan(AUTOSAVE_WRITE);
     try {
       const summary = await saveDraft(snapshot);
+      const duration = endSpan(AUTOSAVE_WRITE) ?? performance.now() - started;
       firstUnsavedChangeAt.current = null;
       dirty.current = false;
-      setLastDurationMs(Math.round(performance.now() - started));
+      setLastDurationMs(Math.round(duration));
       setLastSavedAt(new Date(summary.timestamp));
       setStatus('saved');
       callbacks.current.onSaved?.(summary, trigger);
