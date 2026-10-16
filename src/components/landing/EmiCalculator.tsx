@@ -1,4 +1,6 @@
-import { useId, useMemo, useState } from 'react';
+import {
+  useDeferredValue, useId, useMemo, useState,
+} from 'react';
 import {
   getLoanProduct, LOAN_PRODUCTS, LOAN_TYPES, MIN_LOAN_AMOUNT,
 } from '../../constants/loan';
@@ -35,9 +37,12 @@ export function EmiCalculator({ onApply }: { onApply: (preset: LoanPreset) => vo
   const [amount, setAmount] = useState(START.personal.amount);
   const [tenure, setTenure] = useState(START.personal.tenure);
   const product = getLoanProduct(loanType) ?? LOAN_PRODUCTS.personal;
+  // Dragging a slider fires many updates; the ledger follows at lower priority.
+  const deferredAmount = useDeferredValue(amount);
+  const deferredTenure = useDeferredValue(tenure);
   const estimate = useMemo(
-    () => estimateLoan(amount, product.annualInterestRate, tenure),
-    [amount, tenure, product.annualInterestRate],
+    () => estimateLoan(deferredAmount, product.annualInterestRate, deferredTenure),
+    [deferredAmount, deferredTenure, product.annualInterestRate],
   );
 
   const choose = (next: LoanType) => {
