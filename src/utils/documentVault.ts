@@ -1,5 +1,7 @@
-import { DRAFT_TTL_MS } from '../constants/persistence';
-import { decryptBytes, encryptBytes } from './encryption';
+import { DRAFT_TTL_MS, FILE_KEY_PREFIX, LOCAL_FILE_BUDGET_CHARS } from '../constants/persistence';
+import {
+  base64ToBytes, bytesToBase64, decryptBytes, encryptBytes,
+} from './encryption';
 
 /**
  * Encrypted file vault (crash recovery for uploads, A1.6 f).
@@ -9,9 +11,11 @@ import { decryptBytes, encryptBytes } from './encryption';
  * encryption.ts) and bound to its id so records cannot be swapped. Base64 files in
  * LocalStorage would hit its ~5 MB quota after one or two scans.
  *
- * When IndexedDB is unavailable (some private-browsing modes) files are kept in
- * memory for this session only, so uploading still works; they are simply not
- * recoverable after a reload.
+ * When IndexedDB is unavailable (some private-browsing modes and locked-down
+ * browsers) each file is saved instead as encrypted base64 in LocalStorage, beside
+ * the auto-saved draft, within LOCAL_FILE_BUDGET_CHARS. Files that do not fit are
+ * kept in memory for this session only: uploading still works, but those files
+ * must be re-uploaded after a reload (the uploader says so).
  */
 
 const DB_NAME = 'lendswift_vault';
@@ -23,6 +27,13 @@ interface VaultRecord {
   mimeType: string;
   savedAt: number;
   payload: Uint8Array<ArrayBuffer>;
+}
+
+interface LocalRecord {
+  mimeType: string;
+  savedAt: number;
+  /** AES-GCM ciphertext (IV first), base64-encoded. */
+  payload: string;
 }
 
 const memoryFallback = new Map<string, Blob>();
@@ -58,6 +69,69 @@ function openVault(): Promise<IDBDatabase | null> {
   return dbPromise;
 }
 
+// --- LocalStorage fallback (base64) -------------------------------------------
+
+const localKey = (id: string) => `${FILE_KEY_PREFIX}${id}`;
+
+function localIds(): string[] {
+  try {
+    return Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index) ?? '')
+      .filter((key) => key.startsWith(FILE_KEY_PREFIX))
+      .map((key) => key.slice(FILE_KEY_PREFIX.length));
+  } catch {
+    return [];
+  }
+}
+
+function readLocal(id: string): LocalRecord | null {
+  try {
+    const record = JSON.parse(localStorage.getItem(localKey(id)) ?? 'null') as LocalRecord | null;
+    return record && typeof record.payload === 'string' ? record : null;
+  } catch {
+    return null;
+  }
+}
+
+function removeLocal(id: string): void {
+  try {
+    localStorage.removeItem(localKey(id));
+  } catch {
+    // Storage is unavailable: there is nothing to remove.
+  }
+}
+
+/** Saves an encrypted base64 copy if it fits the budget; returns whether it did. */
+async function saveLocal(id: string, file: Blob): Promise<boolean> {
+  const sealed = await encryptBytes(new Uint8Array(await file.arrayBuffer()), contextFor(id));
+  const serialised = JSON.stringify({
+    mimeType: file.type, savedAt: Date.now(), payload: bytesToBase64(sealed),
+  } satisfies LocalRecord);
+  const used = localIds()
+    .filter((other) => other !== id)
+    .reduce((total, other) => total + (localStorage.getItem(localKey(other))?.length ?? 0), 0);
+  if (used + serialised.length > LOCAL_FILE_BUDGET_CHARS) return false;
+  try {
+    localStorage.setItem(localKey(id), serialised);
+    return true;
+  } catch {
+    return false; // QuotaExceededError, or storage disabled
+  }
+}
+
+async function loadLocal(id: string): Promise<Blob | null> {
+  const record = readLocal(id);
+  if (!record) return null;
+  try {
+    const plain = await decryptBytes(base64ToBytes(record.payload), contextFor(id));
+    return new Blob([plain], { type: record.mimeType });
+  } catch {
+    removeLocal(id);
+    return null;
+  }
+}
+
+// --- IndexedDB ------------------------------------------------------------------
+
 async function withStore<T>(
   mode: IDBTransactionMode,
   run: (store: IDBObjectStore) => IDBRequest<T>,
@@ -69,6 +143,7 @@ async function withStore<T>(
 
 export async function deleteFile(id: string): Promise<void> {
   memoryFallback.delete(id);
+  removeLocal(id);
   await withStore('readwrite', (store) => store.delete(id));
 }
 
@@ -76,7 +151,9 @@ export async function deleteFile(id: string): Promise<void> {
 export async function putFile(id: string, file: Blob): Promise<void> {
   const db = await openVault();
   if (!db) {
+    // Usable at once from memory; persisted for crash recovery when it fits.
     memoryFallback.set(id, file);
+    await saveLocal(id, file);
     return;
   }
   const plain = new Uint8Array(await file.arrayBuffer());
@@ -93,7 +170,7 @@ export async function putFile(id: string, file: Blob): Promise<void> {
 export async function getFile(id: string): Promise<Blob | null> {
   if (memoryFallback.has(id)) return memoryFallback.get(id) ?? null;
   const record = await withStore<VaultRecord | undefined>('readonly', (store) => store.get(id));
-  if (!record) return null;
+  if (!record) return loadLocal(id);
   try {
     const plain = await decryptBytes(record.payload, contextFor(id));
     return new Blob([plain], { type: record.mimeType });
@@ -104,13 +181,14 @@ export async function getFile(id: string): Promise<Blob | null> {
 }
 
 export async function hasFile(id: string): Promise<boolean> {
-  if (memoryFallback.has(id)) return true;
+  if (memoryFallback.has(id) || readLocal(id)) return true;
   return (await withStore('readonly', (store) => store.count(id)) ?? 0) > 0;
 }
 
 /** Removes every stored file (Start fresh, successful submission). */
 export async function clearVault(): Promise<void> {
   memoryFallback.clear();
+  localIds().forEach(removeLocal);
   await withStore('readwrite', (store) => store.clear());
 }
 
@@ -125,10 +203,14 @@ async function allRecords(): Promise<VaultRecord[]> {
 export async function pruneVault(
   { keepIds, now = Date.now() }: { keepIds?: ReadonlySet<string>; now?: number } = {},
 ): Promise<number> {
-  const stale = (await allRecords()).filter(
-    (record) => now - record.savedAt > DRAFT_TTL_MS || (keepIds && !keepIds.has(record.id)),
+  const isStale = (id: string, savedAt: number) => (
+    now - savedAt > DRAFT_TTL_MS || (keepIds !== undefined && !keepIds.has(id))
   );
-  await Promise.all(stale.map((record) => deleteFile(record.id)));
+  const stale = [
+    ...(await allRecords()).map(({ id, savedAt }) => ({ id, savedAt })),
+    ...localIds().map((id) => ({ id, savedAt: readLocal(id)?.savedAt ?? 0 })),
+  ].filter(({ id, savedAt }) => isStale(id, savedAt));
+  await Promise.all(stale.map(({ id }) => deleteFile(id)));
   if (keepIds) {
     [...memoryFallback.keys()]
       .filter((id) => !keepIds.has(id))

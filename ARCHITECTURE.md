@@ -172,7 +172,9 @@ file ─▶ validate (type, magic bytes, size, count) ─▶ compress images (ca
 ```
 
 - Drafts carry only metadata; binaries live in IndexedDB, so a few scans never exhaust
-  LocalStorage's ~5 MB.
+  LocalStorage's ~5 MB. Without IndexedDB, each file is stored as AES-GCM ciphertext in
+  base64 at `lendswift_file_[id]`, within a 2-million-character budget; anything larger is
+  kept in memory for the session, and the uploader asks for it again after a reload.
 - Compression follows the brief: 1200 px wide, JPEG 0.7, minus 0.1 until under 2 MB or 0.3.
   Images are decoded off the main thread (`img.decode()`) and processed one at a time.
   Five 4.1 MB photos measured in Chrome: longest main-thread task 181 ms (development

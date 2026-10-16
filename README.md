@@ -102,7 +102,9 @@ A full walkthrough is in **[ARCHITECTURE.md](ARCHITECTURE.md)**. In short:
 - **TypeScript** throughout (the brief lists it as a bonus) with an `ApplicationData` type that
   has one slice per step.
 - **Encrypted local persistence.** Drafts in LocalStorage carry metadata only; file binaries
-  live in an encrypted IndexedDB vault so a few scans never exhaust the ~5 MB quota.
+  live in an encrypted IndexedDB vault so a few scans never exhaust the ~5 MB quota. Where
+  IndexedDB is unavailable, files fall back to encrypted base64 in LocalStorage beside the
+  draft (the brief's approach), capped at 2 million characters so the draft always fits.
 - **Code splitting.** Each step, the workspace and jsPDF load on demand; failed chunk downloads
   are retried and, if still failing, the person gets a safe reload.
 

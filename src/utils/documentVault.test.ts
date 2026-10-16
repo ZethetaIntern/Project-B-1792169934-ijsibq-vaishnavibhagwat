@@ -3,7 +3,7 @@ import { IDBFactory } from 'fake-indexeddb';
 import {
   beforeEach, describe, expect, it,
 } from 'vitest';
-import { DRAFT_TTL_MS } from '../constants/persistence';
+import { DRAFT_TTL_MS, LOCAL_FILE_BUDGET_CHARS } from '../constants/persistence';
 import {
   clearVault, deleteFile, getFile, hasFile, pruneVault, putFile, resetVaultConnection,
 } from './documentVault';
@@ -34,8 +34,15 @@ function writeRaw(record: object): Promise<void> {
 
 beforeEach(() => {
   globalThis.indexedDB = new IDBFactory();
+  localStorage.clear();
   resetVaultConnection();
 });
+
+function withoutIndexedDb() {
+  // @ts-expect-error simulating a browser without IndexedDB
+  delete globalThis.indexedDB;
+  resetVaultConnection();
+}
 
 describe('document vault', () => {
   it('stores files encrypted and returns the original bytes and type', async () => {
@@ -89,13 +96,47 @@ describe('document vault', () => {
     expect(await hasFile('x')).toBe(false);
   });
 
-  it('falls back to memory when IndexedDB is unavailable', async () => {
-    // @ts-expect-error simulating a browser without IndexedDB
-    delete globalThis.indexedDB;
+  it('without IndexedDB, keeps files as encrypted base64 in LocalStorage that survives a reload', async () => {
+    withoutIndexedDb();
+    await putFile('slip', new Blob(['%PDF-1.7 salary slip'], { type: 'application/pdf' }));
+
+    const stored = localStorage.getItem('lendswift_file_slip') ?? '';
+    expect(JSON.parse(stored)).toMatchObject({ mimeType: 'application/pdf', payload: expect.stringMatching(/^[A-Za-z0-9+/]+=*$/) });
+    expect(stored).not.toContain('salary slip');
+
+    resetVaultConnection(); // a reload: the in-memory copy is gone
+    const restored = await getFile('slip');
+    expect(restored?.type).toBe('application/pdf');
+    expect(await text(restored)).toBe('%PDF-1.7 salary slip');
+    expect(await hasFile('slip')).toBe(true);
+  });
+
+  it('keeps files over the LocalStorage budget in memory for this session only', async () => {
+    withoutIndexedDb();
+    await putFile('scan', new Blob(['x'.repeat(LOCAL_FILE_BUDGET_CHARS)]));
+    expect(localStorage.getItem('lendswift_file_scan')).toBeNull();
+    expect(await hasFile('scan')).toBe(true);
     resetVaultConnection();
-    await putFile('mem', new Blob(['in memory']));
-    expect(await text(await getFile('mem'))).toBe('in memory');
-    await pruneVault({ keepIds: new Set() });
-    expect(await hasFile('mem')).toBe(false);
+    expect(await getFile('scan')).toBeNull();
+  });
+
+  it('prunes, deletes and clears LocalStorage copies, and drops tampered ones', async () => {
+    withoutIndexedDb();
+    await putFile('keep', new Blob(['1']));
+    await putFile('orphan', new Blob(['2']));
+    await putFile('gone', new Blob(['3']));
+    expect(await pruneVault({ keepIds: new Set(['keep', 'gone']) })).toBe(1);
+    expect(localStorage.getItem('lendswift_file_orphan')).toBeNull();
+
+    await deleteFile('gone');
+    expect(localStorage.getItem('lendswift_file_gone')).toBeNull();
+
+    localStorage.setItem('lendswift_file_swapped', localStorage.getItem('lendswift_file_keep') ?? '');
+    resetVaultConnection();
+    expect(await getFile('swapped')).toBeNull();
+    expect(localStorage.getItem('lendswift_file_swapped')).toBeNull();
+
+    await clearVault();
+    expect(localStorage.getItem('lendswift_file_keep')).toBeNull();
   });
 });
