@@ -32,9 +32,10 @@ Landing page (Experience A)                 Application workspace (Experience B)
 ```
 src/
   components/
-    common/       Design-system controls: Input (compound), Select, RadioGroup, Checkbox,
+    common/       Wizard, ProgressBar, StepNavigation (as the brief places them), plus the
+                  design-system controls: Input (compound), Select, RadioGroup, Checkbox,
                   CurrencyInput, MaskedInput, Combobox, FileUpload, SignatureCanvas, Modal…
-    wizard/       Wizard, ProgressBar, StepNavigation, useStepForm, stepFormBridge
+    wizard/       Wizard plumbing: useStepForm, stepFormBridge, useFieldStatus, step registry
     steps/        Step1LoanType … Step8Review (one default export each, lazy-loaded)
     review/       Key fact statement, review sections, disclosures, submit panel, success
     documents/    Document checklist
@@ -67,7 +68,7 @@ The **Wizard pattern** separates three concerns:
 | Concern | Lives in | Knows about |
 | --- | --- | --- |
 | Which steps exist and in what order | `constants/steps.ts` (`STEPS`, `isStepActive`) | Step metadata only |
-| Navigation, gating, history, focus | `components/wizard/Wizard.tsx`, `utils/wizardNavigation.ts` | Steps as ids, never their fields |
+| Navigation, gating, history, focus | `components/common/Wizard.tsx`, `utils/wizardNavigation.ts` | Steps as ids, never their fields |
 | Fields and local validation | `components/steps/StepN*.tsx` + `schemas/stepNSchema.ts` | Its own slice of `ApplicationData` |
 
 Each step calls `useStepForm(stepId)`, which:

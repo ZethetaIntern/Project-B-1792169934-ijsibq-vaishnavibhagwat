@@ -1,5 +1,5 @@
 import { ArrowLeft, ArrowRight, Save } from 'lucide-react';
-import { Button } from '../common/Button';
+import { Button } from './Button';
 
 interface StepNavigationProps {
   formId: string;

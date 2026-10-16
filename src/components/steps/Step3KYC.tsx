@@ -10,7 +10,7 @@ import {
   isDigit,
   upperAlphanumeric,
 } from '../../utils/inputFormatting';
-import { allowedPanEntities, validateAadhaar } from '../../utils/validators';
+import { allowedPanEntities } from '../../utils/validators';
 import { Callout } from '../common/Callout';
 import { Checkbox } from '../common/Checkbox';
 import { Collapse } from '../common/Collapse';
@@ -35,15 +35,12 @@ export default function Step3KYC() {
   const loan = useApplicationStore((state) => state.data.loan);
   const showPassport = isPassportFieldVisible(loan);
 
-  const aadhaarCheck = useVerification('aadhaar', {
-    validate: validateAadhaar,
-    initiallyVerified: getValues('aadhaarVerified'),
-  });
   const aadhaar = useWatch({ control, name: 'aadhaar' });
+  const aadhaarCheck = useVerification(aadhaar, 'aadhaar', { initiallyVerified: getValues('aadhaarVerified') });
 
   const verifyAadhaar = async () => {
     if (getValues('aadhaarVerified')) return;
-    if (await aadhaarCheck.verify(getValues('aadhaar'))) {
+    if (await aadhaarCheck.verify()) {
       setValue('aadhaarVerified', true);
       trigger('aadhaar');
     }
@@ -89,7 +86,6 @@ export default function Step3KYC() {
                 onChange={(event) => {
                   field.onChange(event.target.value.replace(/\D/g, ''));
                   if (getValues('aadhaarVerified')) setValue('aadhaarVerified', false);
-                  aadhaarCheck.reset();
                 }}
                 onBlur={() => {
                   field.onBlur();

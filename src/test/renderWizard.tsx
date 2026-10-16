@@ -3,7 +3,7 @@ import {
 } from '@testing-library/react';
 import { expect } from 'vitest';
 import { ToastProvider } from '../components/common/Toast';
-import { Wizard } from '../components/wizard/Wizard';
+import { Wizard } from '../components/common/Wizard';
 import { useApplicationStore } from '../store/applicationStore';
 import type { ApplicationData, StepId } from '../types/application';
 

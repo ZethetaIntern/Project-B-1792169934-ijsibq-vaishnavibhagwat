@@ -11,7 +11,7 @@ import { createCompleteApplication } from '../../test/fixtures';
 import { lockDrafts } from '../../utils/draftStorage';
 import * as submitModule from '../../utils/submitApplication';
 import { ToastProvider } from '../common/Toast';
-import { Wizard } from '../wizard/Wizard';
+import { Wizard } from '../common/Wizard';
 
 const CONSENTS = [/true, complete and accurate/, /get my credit report/, /I have read and agree/, /receive updates/];
 

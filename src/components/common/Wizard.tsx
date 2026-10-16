@@ -21,12 +21,12 @@ import {
   getReturnToReviewTarget,
   resolveActiveStepId,
 } from '../../utils/wizardNavigation';
-import { LoadErrorBoundary } from '../common/LoadErrorBoundary';
+import { LoadErrorBoundary } from './LoadErrorBoundary';
 import { ProgressBar } from './ProgressBar';
-import { stepFormBridge } from './stepFormBridge';
+import { stepFormBridge } from '../wizard/stepFormBridge';
 import { StepNavigation } from './StepNavigation';
-import { STEP_COMPONENTS } from './stepComponents';
-import { WizardNavigationContext, type WizardNavigation } from './WizardNavigationContext';
+import { STEP_COMPONENTS } from '../wizard/stepComponents';
+import { WizardNavigationContext, type WizardNavigation } from '../wizard/WizardNavigationContext';
 
 const FORM_ID = 'wizard-step-form';
 const FOCUSABLE_FIELD = [

@@ -25,7 +25,7 @@ import { ResumeDraftModal } from '../persistence/ResumeDraftModal';
 import { LoanLedger } from '../summary/LoanLedger';
 import { MobileLoanSummary } from '../summary/MobileLoanSummary';
 import { getLiveApplicationData, stepFormBridge } from '../wizard/stepFormBridge';
-import { Wizard } from '../wizard/Wizard';
+import { Wizard } from '../common/Wizard';
 import { AppHeader } from './AppHeader';
 import { StepGuidance } from './StepGuidance';
 

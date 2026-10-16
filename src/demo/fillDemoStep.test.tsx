@@ -6,7 +6,7 @@ import {
   beforeEach, describe, expect, it,
 } from 'vitest';
 import { ToastProvider } from '../components/common/Toast';
-import { Wizard } from '../components/wizard/Wizard';
+import { Wizard } from '../components/common/Wizard';
 import { useApplicationStore } from '../store/applicationStore';
 import { createCompleteApplication } from '../test/fixtures';
 import { fillDemoStep } from './fillDemoStep';
