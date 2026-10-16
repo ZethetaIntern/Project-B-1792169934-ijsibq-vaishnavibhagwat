@@ -62,6 +62,8 @@
   --animate-fade-in: fade-in 180ms ease-out both;
   --animate-toast-in: toast-in 260ms var(--ease-out-quart) both;
   --animate-pop: pop 320ms var(--ease-out-quart) both;
+  /* Landing hero: marketing motion, so a little longer than UI transitions. */
+  --animate-rise: rise 560ms var(--ease-out-quart) both;
 
   @keyframes step-in {
     from {
@@ -91,6 +93,17 @@
     to {
       opacity: 1;
       transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
@@ -150,6 +163,28 @@
     min-height: 0;
     overflow: hidden;
   }
+}
+
+/*
+ * Landing sections that rise into view once (Reveal.tsx). Items marked
+ * data-reveal-item follow their section with a per-item transition-delay.
+ * Only the reveal is transitioned: hiding happens off-screen, instantly.
+ */
+[data-reveal='shown'],
+[data-reveal='shown'] [data-reveal-item] {
+  transition:
+    opacity 600ms var(--ease-out-quart),
+    transform 600ms var(--ease-out-quart);
+}
+
+[data-reveal='hidden'] {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+[data-reveal='hidden'] [data-reveal-item] {
+  opacity: 0;
+  transform: translateY(8px);
 }
 
 @media (prefers-reduced-motion: reduce) {
