@@ -59,7 +59,15 @@ function openVault(): Promise<IDBDatabase | null> {
       request.onupgradeneeded = () => {
         request.result.createObjectStore(STORE, { keyPath: 'id' });
       };
-      request.onsuccess = () => resolve(request.result);
+      request.onsuccess = () => {
+        const db = request.result;
+        // Another tab deleting or upgrading the vault must not be blocked by this one.
+        db.onversionchange = () => {
+          db.close();
+          dbPromise = null;
+        };
+        resolve(db);
+      };
       request.onerror = () => resolve(null);
       request.onblocked = () => resolve(null);
     } catch {
@@ -219,8 +227,9 @@ export async function pruneVault(
   return stale.length;
 }
 
-/** Test helper: forget the open connection so a fresh IndexedDB can be used. */
+/** Test helper: close and forget the connection so a fresh IndexedDB can be used. */
 export function resetVaultConnection(): void {
+  dbPromise?.then((db) => db?.close()).catch(() => undefined);
   dbPromise = null;
   memoryFallback.clear();
 }
