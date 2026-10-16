@@ -1,10 +1,10 @@
 import {
   Eraser, EyeOff, PenLine, RotateCcw, Type,
 } from 'lucide-react';
-import SignaturePad from 'signature_pad';
 import {
-  useEffect, useId, useRef, useState,
+  useEffect, useId, useRef, useState, type CanvasHTMLAttributes,
 } from 'react';
+import ReactSignatureCanvas from 'react-signature-canvas';
 import type { SignatureMethod } from '../../types/application';
 import { cn } from '../../utils/cn';
 import { Button } from './Button';
@@ -77,52 +77,43 @@ export interface SignatureCanvasProps {
 }
 
 /**
- * E-signature capture: draw with mouse, touch or stylus (signature_pad), or type a
- * name for a keyboard-only alternative. The user confirms before the PNG is stored;
+ * E-signature capture: draw with mouse, touch or stylus (react-signature-canvas), or
+ * type a name for a keyboard-only alternative. The user confirms before the PNG is stored;
  * the canvas resizes with its container without losing strokes.
  */
 export function SignatureCanvas({
   label, value, onChange, error, defaultTypedName = '', description,
 }: SignatureCanvasProps) {
   const baseId = useId();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const padRef = useRef<SignaturePad | null>(null);
+  const padRef = useRef<ReactSignatureCanvas>(null);
   const [mode, setMode] = useState<SignatureMethod>('draw');
   const [hasStrokes, setHasStrokes] = useState(false);
   const [typedName, setTypedName] = useState(defaultTypedName);
   const inactive = useWindowInactive();
   const editing = !value;
 
+  // The library only sizes the canvas on mount (or clears it on resize). Instead,
+  // match the bitmap to its CSS size × device pixel ratio whenever the layout
+  // changes, redrawing the strokes so a rotated phone keeps the signature.
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!editing || mode !== 'draw' || !canvas) return undefined;
-    const pad = new SignaturePad(canvas, {
-      penColor: INK, backgroundColor: PAPER, minWidth: 0.8, maxWidth: 2.6,
-    });
-    padRef.current = pad;
-    const onEnd = () => setHasStrokes(!pad.isEmpty());
-    pad.addEventListener('endStroke', onEnd);
-
-    // Match the canvas bitmap to its CSS size × device pixel ratio, keeping strokes.
+    const pad = padRef.current;
+    if (!editing || mode !== 'draw' || !pad) return undefined;
+    const canvas = pad.getCanvas();
     const resize = () => {
       const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      const width = canvas.offsetWidth * ratio;
+      const height = canvas.offsetHeight * ratio;
+      if (canvas.width === width && canvas.height === height) return;
       const strokes = pad.toData();
-      canvas.width = canvas.offsetWidth * ratio;
-      canvas.height = canvas.offsetHeight * ratio;
+      canvas.width = width;
+      canvas.height = height;
       canvas.getContext('2d')?.scale(ratio, ratio);
-      pad.clear();
       pad.fromData(strokes);
     };
     resize();
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(resize);
     observer?.observe(canvas);
-
-    return () => {
-      observer?.disconnect();
-      pad.removeEventListener('endStroke', onEnd);
-      pad.off();
-      padRef.current = null;
-    };
+    return () => observer?.disconnect();
   }, [editing, mode]);
 
   const clearDraft = () => {
@@ -189,11 +180,19 @@ export function SignatureCanvas({
         <div className="flex flex-col gap-3">
           {mode === 'draw' ? (
             <div className={cn('relative rounded-field border bg-surface', error ? 'border-danger-ink' : 'border-line-strong')}>
-              <canvas
-                ref={canvasRef}
-                aria-label={`${label} pad. Draw with a mouse, finger or stylus, or choose Type to sign with the keyboard.`}
-                className="block h-40 w-full touch-none rounded-field sm:h-44"
-                data-testid="signature-canvas"
+              <ReactSignatureCanvas
+                ref={padRef}
+                penColor={INK}
+                backgroundColor={PAPER}
+                minWidth={0.8}
+                maxWidth={2.6}
+                clearOnResize={false}
+                onEnd={() => setHasStrokes(!padRef.current?.isEmpty())}
+                canvasProps={{
+                  'aria-label': `${label} pad. Draw with a mouse, finger or stylus, or choose Type to sign with the keyboard.`,
+                  className: 'block h-40 w-full touch-none rounded-field sm:h-44',
+                  'data-testid': 'signature-canvas',
+                } as CanvasHTMLAttributes<HTMLCanvasElement>}
               />
               <span aria-hidden="true" className="pointer-events-none absolute right-6 bottom-9 left-6 border-b border-dashed border-line-strong" />
               {!hasStrokes && (

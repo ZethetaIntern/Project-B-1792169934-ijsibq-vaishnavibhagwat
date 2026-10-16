@@ -57,16 +57,17 @@ Cypress.Commands.add('drawSignature', (groupLabel) => {
   cy.contains('[role="group"]', groupLabel).within(() => {
     cy.get('[data-testid="signature-canvas"]').scrollIntoView().then(($canvas) => {
       const rect = $canvas[0].getBoundingClientRect();
-      // `buttons` is 1 while the pen is down and 0 on release, as in a real browser.
+      // react-signature-canvas (signature_pad 2) listens for mouse and touch events and
+      // only draws while the left button (`which: 1`) is held.
       const point = (x, y, buttons = 1) => ({
-        eventConstructor: 'PointerEvent', clientX: rect.left + x, clientY: rect.top + y, pointerId: 1, isPrimary: true, button: 0, buttons, pressure: buttons ? 0.5 : 0, pointerType: 'mouse',
+        eventConstructor: 'MouseEvent', clientX: rect.left + x, clientY: rect.top + y, which: 1, button: 0, buttons,
       });
       cy.wrap($canvas)
-        .trigger('pointerdown', point(30, 60))
-        .trigger('pointermove', point(90, 30))
-        .trigger('pointermove', point(160, 90))
-        .trigger('pointermove', point(240, 40))
-        .trigger('pointerup', point(240, 40, 0));
+        .trigger('mousedown', point(30, 60))
+        .trigger('mousemove', point(90, 30))
+        .trigger('mousemove', point(160, 90))
+        .trigger('mousemove', point(240, 40))
+        .trigger('mouseup', point(240, 40, 0));
     });
   });
 });
