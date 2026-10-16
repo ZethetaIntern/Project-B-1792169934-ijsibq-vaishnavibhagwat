@@ -98,7 +98,7 @@ export default [
     files: [
       '*.config.{js,ts}',
       'cypress/**/*.{js,ts}',
-      'scripts/**/*.{js,mjs}',
+      'scripts/**/*.{js,mjs,cjs}',
       'src/**/*.test.{ts,tsx}',
       'src/test/**/*.{ts,tsx}',
     ],
