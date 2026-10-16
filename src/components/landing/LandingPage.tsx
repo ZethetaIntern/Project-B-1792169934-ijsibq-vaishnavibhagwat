@@ -12,6 +12,7 @@ import { HowItWorks } from './HowItWorks';
 import { LandingFooter } from './LandingFooter';
 import { LandingHeader } from './LandingHeader';
 import { LoanProducts } from './LoanProducts';
+import { Reveal } from './Reveal';
 import { TrustNotes } from './TrustNotes';
 
 interface LandingPageProps {
@@ -51,22 +52,27 @@ export function LandingPage({ secondaryAction }: LandingPageProps) {
               repay before you begin, upload documents from your phone, and pick up where you
               left off.
             </p>
-            <div className="flex flex-wrap gap-3">
+            {/* Headline and intro paint at once (they carry the LCP); the rest rises in. */}
+            <div className="flex flex-wrap gap-3 motion-safe:animate-rise">
               <Button size="lg" onClick={start} trailingIcon={<ArrowRight aria-hidden="true" className="size-4" />}>
                 Start your application
               </Button>
               {secondaryAction}
             </div>
-            <p className="text-sm text-slate">You will need your PAN, Aadhaar and recent bank statements.</p>
+            <p className="text-sm text-slate motion-safe:animate-rise motion-safe:[animation-delay:60ms]">
+              You will need your PAN, Aadhaar and recent bank statements.
+            </p>
           </div>
-          <EmiCalculator onApply={startWith} />
+          <div className="motion-safe:animate-rise motion-safe:[animation-delay:120ms]">
+            <EmiCalculator onApply={startWith} />
+          </div>
         </section>
 
-        <LoanProducts onChoose={(loanType) => startWith({ loanType })} />
-        <HowItWorks />
-        <Eligibility />
-        <TrustNotes />
-        <HelpFaq />
+        <Reveal><LoanProducts onChoose={(loanType) => startWith({ loanType })} /></Reveal>
+        <Reveal><HowItWorks /></Reveal>
+        <Reveal><Eligibility /></Reveal>
+        <Reveal><TrustNotes /></Reveal>
+        <Reveal><HelpFaq /></Reveal>
       </main>
       <LandingFooter />
     </div>

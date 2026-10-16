@@ -31,7 +31,12 @@ export function HowItWorks() {
 
       <ol className="relative flex flex-col">
         {STEPS.map((step, index) => (
-          <li key={step.id} className="relative flex gap-4 pb-6 last:pb-0">
+          <li
+            key={step.id}
+            data-reveal-item
+            style={{ transitionDelay: `${120 + index * 50}ms` }}
+            className="relative flex gap-4 pb-6 last:pb-0"
+          >
             {index < STEPS.length - 1 && (
               <span aria-hidden="true" className="absolute top-9 bottom-1 left-[17px] w-px bg-line-strong/40" />
             )}
