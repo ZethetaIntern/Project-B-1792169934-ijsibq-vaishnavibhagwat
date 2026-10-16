@@ -3,7 +3,9 @@ import {
 } from 'react';
 import { AUTOSAVE_INTERVAL_MS } from '../constants/persistence';
 import { saveDraft, type DraftSummary } from '../utils/draftStorage';
+import { getEncryptionKey } from '../utils/encryption';
 import type { ApplicationSnapshot } from '../store/applicationStore';
+import { AUTOSAVE_WRITE, endSpan, startSpan } from '../utils/userTiming';
 
 export type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -56,6 +58,16 @@ export function useAutoSave(
     getSnapshot, onSaved, onError, enabled,
   });
 
+  // Derive the encryption key ahead of the first save: PBKDF2 (150,000 rounds) takes
+  // about 100 ms, which would otherwise push the first write past its 50 ms budget.
+  // Web Crypto runs it off the main thread, so warming it up never blocks input.
+  useEffect(() => {
+    const warmUp = window.setTimeout(() => {
+      getEncryptionKey().catch(() => undefined);
+    }, 0);
+    return () => window.clearTimeout(warmUp);
+  }, []);
+
   useEffect(() => {
     callbacks.current = {
       getSnapshot, onSaved, onError, enabled,
@@ -72,11 +84,13 @@ export function useAutoSave(
 
     setStatus('saving');
     const started = performance.now();
+    startSpan(AUTOSAVE_WRITE);
     try {
       const summary = await saveDraft(snapshot);
+      const duration = endSpan(AUTOSAVE_WRITE) ?? performance.now() - started;
       firstUnsavedChangeAt.current = null;
       dirty.current = false;
-      setLastDurationMs(Math.round(performance.now() - started));
+      setLastDurationMs(Math.round(duration));
       setLastSavedAt(new Date(summary.timestamp));
       setStatus('saved');
       callbacks.current.onSaved?.(summary, trigger);

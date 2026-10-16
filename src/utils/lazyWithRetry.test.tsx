@@ -31,6 +31,20 @@ describe('lazyWithRetry', () => {
     expect(load).toHaveBeenCalledTimes(2);
   });
 
+  it('renders a preloaded component straight away, without a fallback', async () => {
+    const load = vi.fn().mockResolvedValue({ default: Loaded });
+    const Step = lazyWithRetry(load);
+    await Step.preload();
+    render(
+      <Suspense fallback={<p>Loading…</p>}>
+        <Step />
+      </Suspense>,
+    );
+    expect(screen.getByText('Step loaded')).toBeInTheDocument();
+    expect(screen.queryByText('Loading…')).not.toBeInTheDocument();
+    expect(load).toHaveBeenCalledTimes(1);
+  });
+
   it('shows a reload prompt when every attempt fails', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     const load = vi.fn().mockRejectedValue(new TypeError('Failed to fetch dynamically imported module'));

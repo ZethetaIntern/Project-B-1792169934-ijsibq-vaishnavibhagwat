@@ -21,6 +21,7 @@ import {
   getReturnToReviewTarget,
   resolveActiveStepId,
 } from '../../utils/wizardNavigation';
+import { endSpan, startSpan, STEP_TRANSITION } from '../../utils/userTiming';
 import { LoadErrorBoundary } from './LoadErrorBoundary';
 import { ProgressBar } from './ProgressBar';
 import { stepFormBridge } from '../wizard/stepFormBridge';
@@ -104,6 +105,7 @@ export function Wizard({ onSaveDraft }: WizardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const lockRef = useRef(false);
   const focusOnMountRef = useRef(false);
+  const transitionPendingRef = useRef(false);
   const fromHistoryRef = useRef(false);
   const [busy, setBusy] = useState(false);
   // Continue only works once the step's (code-split) form has mounted and registered.
@@ -147,8 +149,12 @@ export function Wizard({ onSaveDraft }: WizardProps) {
     runLocked(async () => {
       const controller = stepFormBridge.get();
       if (!controller) return;
+      // Step transition budget (< 200 ms): Continue pressed → next step interactive.
+      transitionPendingRef.current = true;
+      startSpan(STEP_TRANSITION);
       const valid = await controller.validate();
       if (!valid) {
+        transitionPendingRef.current = false;
         setAnnouncement('Some answers need your attention. The first one has been selected.');
         return;
       }
@@ -156,14 +162,27 @@ export function Wizard({ onSaveDraft }: WizardProps) {
       const target = returnToReview
         ? getReturnToReviewTarget(latest)
         : getNextStepId(currentStepId, latest);
-      if (target) navigate(target);
+      if (target) {
+        // Switch only once the step's code is here, so it never suspends (see lazyWithRetry).
+        await STEP_COMPONENTS[target].preload();
+        navigate(target);
+      } else {
+        transitionPendingRef.current = false;
+      }
     });
   };
 
-  const handleBack = () => runLocked(() => {
+  const handleBack = () => runLocked(async () => {
+    transitionPendingRef.current = true;
+    startSpan(STEP_TRANSITION);
     saveOpenStep();
     const previous = getPreviousStepId(currentStepId, getApplicationSnapshot().data);
-    if (previous) navigate(previous);
+    if (previous) {
+      await STEP_COMPONENTS[previous].preload();
+      navigate(previous);
+    } else {
+      transitionPendingRef.current = false;
+    }
   });
 
   const navigation = useMemo<WizardNavigation>(() => ({
@@ -183,7 +202,10 @@ export function Wizard({ onSaveDraft }: WizardProps) {
     } else {
       saveOpenStep();
     }
-    if (canNavigateTo(target, getApplicationSnapshot().data)) navigate(target);
+    if (canNavigateTo(target, getApplicationSnapshot().data)) {
+      await STEP_COMPONENTS[target].preload();
+      navigate(target);
+    }
   });
 
   // Browser history: every step is an entry, so the Back button walks the wizard.
@@ -220,8 +242,18 @@ export function Wizard({ onSaveDraft }: WizardProps) {
 
   const handleStepMounted = useCallback((stepId: StepId) => {
     setReadyStepId(stepId);
+    // Fetch the neighbouring steps now, so Continue and Back never wait for code.
+    const active = getActiveSteps(getApplicationSnapshot().data);
+    const index = active.findIndex((step) => step.id === stepId);
+    [active[index + 1], active[index - 1]].forEach((step) => {
+      if (step) STEP_COMPONENTS[step.id].preload();
+    });
     // Marks the step as interactive (form subscriptions are live) — used by E2E tests.
     containerRef.current?.setAttribute('data-step-ready', 'true');
+    if (transitionPendingRef.current) {
+      transitionPendingRef.current = false;
+      endSpan(STEP_TRANSITION);
+    }
     if (!focusOnMountRef.current) return;
     focusOnMountRef.current = false;
     window.scrollTo({ top: 0 });

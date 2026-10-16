@@ -7,7 +7,7 @@ export const ROUTE_PATHS: Record<AppRoute, string> = {
   apply: '/apply',
 };
 
-function routeFromPath(pathname: string): AppRoute {
+export function routeFromPath(pathname: string): AppRoute {
   return pathname.replace(/\/+$/, '') === ROUTE_PATHS.apply ? 'apply' : 'landing';
 }
 
