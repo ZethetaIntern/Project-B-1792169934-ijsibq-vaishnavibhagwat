@@ -1,11 +1,17 @@
 /// <reference types="vitest/config" />
-import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+/** Oldest browsers the brief supports (B4). Tailwind runs through postcss.config.js. */
+const BROWSER_TARGETS = ['chrome90', 'edge90', 'firefox88', 'safari14'];
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react()],
+  build: {
+    target: BROWSER_TARGETS,
+    cssTarget: BROWSER_TARGETS,
+  },
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
