@@ -1,7 +1,9 @@
 // @vitest-environment node
-import { describe, expect, it } from 'vitest';
 import {
-  base64ToBytes, bytesToBase64, decryptString, encryptString,
+  afterEach, describe, expect, it, vi,
+} from 'vitest';
+import {
+  base64ToBytes, bytesToBase64, decryptString, encryptString, resetEncryptionKey,
 } from './encryption';
 
 const CONTEXT = 'lendswift_draft_home';
@@ -41,5 +43,25 @@ describe('AES-256-GCM draft encryption', () => {
     const large = 'x'.repeat(200_000);
     const sealed = await encryptString(large, CONTEXT);
     await expect(decryptString(sealed, CONTEXT)).resolves.toHaveLength(200_000);
+  });
+});
+
+describe('engines without PBKDF2', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    resetEncryptionKey();
+  });
+
+  it('falls back to a digest-derived key and tags the payload', async () => {
+    const importKey = crypto.subtle.importKey.bind(crypto.subtle);
+    vi.spyOn(crypto.subtle, 'importKey').mockImplementation(((format: never, data: never, algorithm: never, extractable: never, usages: never) => {
+      if (algorithm === 'PBKDF2') return Promise.reject(new DOMException('The operation is not supported.', 'NotSupportedError'));
+      return importKey(format, data, algorithm, extractable, usages);
+    }) as typeof crypto.subtle.importKey);
+    resetEncryptionKey();
+
+    const sealed = await encryptString(SECRET, CONTEXT);
+    expect(sealed.startsWith('v1d.')).toBe(true);
+    await expect(decryptString(sealed, CONTEXT)).resolves.toBe(SECRET);
   });
 });

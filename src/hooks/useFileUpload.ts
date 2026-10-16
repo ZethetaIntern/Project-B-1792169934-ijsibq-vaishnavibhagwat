@@ -6,6 +6,7 @@ import type { UploadedDocument } from '../types/application';
 import { deleteFile, hasFile, putFile } from '../utils/documentVault';
 import { checkSize, tooManyFilesMessage, validateIncomingFile } from '../utils/fileValidation';
 import { formatBytes } from '../utils/format';
+import { createUuid } from '../utils/ids';
 import { compressImage, isCompressibleImage } from '../utils/imageCompression';
 import { NetworkUnavailableError, wait } from '../utils/simulate';
 
@@ -90,7 +91,7 @@ export function useFileUpload({
     const prepared = retryBlobs.current.get(key);
     if (!prepared) return;
     patch(key, { stage: 'uploading', progress: 0, error: undefined });
-    const id = crypto.randomUUID();
+    const id = createUuid();
     try {
       const steps = Math.max(Math.round(uploadDuration(prepared.file.size) / PROGRESS_TICK_MS), 1);
       for (let step = 1; step <= steps; step += 1) {
@@ -165,7 +166,7 @@ export function useFileUpload({
       return;
     }
 
-    const queued = accepted.map((file) => ({ key: crypto.randomUUID(), file }));
+    const queued = accepted.map((file) => ({ key: createUuid(), file }));
     setPending((current) => [...current, ...queued.map(({ key, file }) => ({
       key, name: file.name, size: file.size, stage: 'checking' as const, progress: 0,
     }))]);

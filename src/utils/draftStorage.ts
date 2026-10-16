@@ -5,6 +5,7 @@ import { draftMetaSchema, draftPayloadSchema } from '../schemas/draftSchema';
 import type { ApplicationSnapshot } from '../store/applicationStore';
 import type { LoanType, StepId } from '../types/application';
 import { decryptString, encryptString } from './encryption';
+import { createUuid } from './ids';
 
 export interface DraftMeta {
   version: string;
@@ -26,9 +27,7 @@ export class DraftUnavailableError extends Error {
 }
 
 /** Identifies this browser tab so concurrent tabs can detect each other's saves. */
-export const TAB_ID = typeof crypto !== 'undefined' && 'randomUUID' in crypto
-  ? crypto.randomUUID()
-  : `tab-${Date.now()}`;
+export const TAB_ID = typeof crypto !== 'undefined' ? createUuid() : `tab-${Date.now()}`;
 
 export const draftKeyFor = (loanType: LoanType | '') => `${DRAFT_KEY_PREFIX}${loanType || 'new'}`;
 const metaKeyFor = (draftKey: string) => `${draftKey}${DRAFT_META_SUFFIX}`;

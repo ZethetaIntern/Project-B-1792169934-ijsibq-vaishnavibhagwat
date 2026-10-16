@@ -68,7 +68,8 @@ export async function fillDemoStep(
     const { coApplicant } = scenario.data;
     controller.fill({ ...coApplicant, signature: renderTypedSignature(coApplicant.fullName) });
   } else {
-    controller.fill(structuredClone(scenario.data[stepId]));
+    // JSON copy: the data is plain JSON and structuredClone is too new for Safari 14.
+    controller.fill(JSON.parse(JSON.stringify(scenario.data[stepId])));
   }
   return {
     filled: true,
