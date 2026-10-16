@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { DOCUMENT_ORDER } from '../constants/documents';
+import { MAX_PREVIOUS_EMPLOYERS } from '../constants/loan';
 import { DRAFT_SCHEMA_VERSION } from '../constants/persistence';
 import { STEP_ORDER } from '../constants/steps';
 import type { DocumentTypeId } from '../types/application';
@@ -17,6 +18,8 @@ const bool = z.boolean();
 const address = z.object({
   line1: str, line2: str, pinCode: str, city: str, state: str, postOffice: str,
 }).strict();
+
+const previousEmployer = z.object({ companyName: str, designation: str, years: num }).strict();
 
 const signature = z.string().max(500_000).refine((value) => !value || value.startsWith('data:image/png;base64,'), 'Invalid signature image');
 
@@ -66,6 +69,8 @@ export const draftDataSchema = z.object({
     companyName: str,
     designation: str,
     monthlySalary: num,
+    // Added after 1.0 shipped: drafts saved before it simply have no previous employers.
+    previousEmployers: z.array(previousEmployer).max(MAX_PREVIOUS_EMPLOYERS).default([]),
     businessName: str,
     businessType: str,
     annualTurnover: num,

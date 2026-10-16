@@ -59,6 +59,7 @@ export function createEmptyApplication(): ApplicationData {
       companyName: '',
       designation: '',
       monthlySalary: null,
+      previousEmployers: [],
       businessName: '',
       businessType: '',
       annualTurnover: null,

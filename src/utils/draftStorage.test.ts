@@ -33,6 +33,14 @@ describe('draft storage', () => {
     await expect(loadDraft(draftKeyFor('home'))).resolves.toEqual(snapshot());
   });
 
+  it('restores drafts saved before previous employers were added', async () => {
+    const older = snapshot();
+    const { previousEmployers, ...employment } = older.data.employment;
+    await saveDraft({ ...older, data: { ...older.data, employment } } as never, 'tab-a');
+    const restored = await loadDraft(draftKeyFor('home'));
+    expect(restored.data.employment.previousEmployers).toEqual(previousEmployers);
+  });
+
   it('moves the draft when this tab changes loan type', async () => {
     await saveDraft(snapshot(''), 'tab-a');
     await saveDraft(snapshot('personal'), 'tab-a');

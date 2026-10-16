@@ -3,7 +3,7 @@ import type { ApplicationData } from '../types/application';
 import { formatINR } from '../utils/format';
 import { validateGstin } from '../utils/validators';
 import {
-  MIN_ANNUAL_TURNOVER, MIN_MONTHLY_SALARY, MIN_YEARS_IN_BUSINESS,
+  MAX_PREVIOUS_EMPLOYERS, MIN_ANNUAL_TURNOVER, MIN_MONTHLY_SALARY, MIN_YEARS_IN_BUSINESS,
 } from '../constants/loan';
 import { addressShape, checkAddress } from './addressSchema';
 import { fail, optionalNumber, text } from './common';
@@ -25,21 +25,27 @@ export const BUSINESS_TYPES = [
 
 const ORGANISATION_NAME = /^[\p{L}\p{N}\s.,&()'/-]+$/u;
 
-function checkOrganisation(ctx: z.RefinementCtx, field: string, value: string, label: string) {
-  if (!value) fail(ctx, [field], `Enter the ${label}.`);
-  else if (value.length < 2 || value.length > 100) fail(ctx, [field], `The ${label} should be 2–100 characters.`);
-  else if (!ORGANISATION_NAME.test(value)) fail(ctx, [field], `Remove unusual symbols from the ${label}.`);
+/** A top-level field name, or the path to a field inside a list item. */
+type FieldPath = string | (string | number)[];
+const toPath = (field: FieldPath) => (Array.isArray(field) ? field : [field]);
+
+function checkOrganisation(ctx: z.RefinementCtx, field: FieldPath, value: string, label: string) {
+  const path = toPath(field);
+  if (!value) fail(ctx, path, `Enter the ${label}.`);
+  else if (value.length < 2 || value.length > 100) fail(ctx, path, `The ${label} should be 2–100 characters.`);
+  else if (!ORGANISATION_NAME.test(value)) fail(ctx, path, `Remove unusual symbols from the ${label}.`);
 }
 
 function checkWholeYears(
   ctx: z.RefinementCtx,
-  field: string,
+  field: FieldPath,
   value: number | null,
   { min, label }: { min: number; label: string },
 ) {
-  if (value === null) fail(ctx, [field], `Enter your ${label} in whole years.`);
+  const path = toPath(field);
+  if (value === null) fail(ctx, path, `Enter your ${label} in whole years.`);
   else if (!Number.isInteger(value) || value < min || value > 50) {
-    fail(ctx, [field], min > 0
+    fail(ctx, path, min > 0
       ? `${label[0].toUpperCase()}${label.slice(1)} must be at least ${min} years (and at most 50).`
       : `Enter a whole number of years between 0 and 50 for your ${label}.`);
   }
@@ -47,12 +53,51 @@ function checkWholeYears(
 
 const common = { yearsOfExperience: optionalNumber };
 
+const previousEmployer = z.object({
+  companyName: text,
+  designation: text,
+  years: optionalNumber,
+});
+
+type PreviousEmployerValues = z.infer<typeof previousEmployer>;
+
+/**
+ * Each listed past job needs a name, title and duration, and together they cannot
+ * add up to more than the total experience entered below them.
+ */
+function checkPreviousEmployers(
+  ctx: z.RefinementCtx,
+  jobs: PreviousEmployerValues[],
+  yearsOfExperience: number | null,
+) {
+  jobs.forEach((job, index) => {
+    const path = (field: string) => ['previousEmployers', index, field];
+    checkOrganisation(ctx, path('companyName'), job.companyName, 'company name');
+    if (!job.designation) fail(ctx, path('designation'), 'Enter the job title you held.');
+    else if (job.designation.length > 60) fail(ctx, path('designation'), 'Keep the job title to 60 characters or fewer.');
+    checkWholeYears(ctx, path('years'), job.years, { min: 0, label: 'time at that company' });
+  });
+  const listed = jobs.reduce((total, job) => total + (job.years ?? 0), 0);
+  const total = yearsOfExperience;
+  if (total !== null && Number.isInteger(total) && listed > total) {
+    fail(
+      ctx,
+      ['yearsOfExperience'],
+      `Your previous jobs add up to ${listed} years, more than the ${total} years of total experience entered.`,
+    );
+  }
+}
+
 const salaried = z.object({
   employmentType: z.literal('salaried'),
   ...common,
   companyName: text,
   designation: text,
   monthlySalary: optionalNumber,
+  previousEmployers: z.array(previousEmployer).max(
+    MAX_PREVIOUS_EMPLOYERS,
+    `List up to ${MAX_PREVIOUS_EMPLOYERS} previous employers.`,
+  ),
 }).superRefine((job, ctx) => {
   checkWholeYears(ctx, 'yearsOfExperience', job.yearsOfExperience, { min: 0, label: 'work experience' });
   checkOrganisation(ctx, 'companyName', job.companyName, 'company name');
@@ -62,6 +107,7 @@ const salaried = z.object({
   else if (job.monthlySalary < MIN_MONTHLY_SALARY) {
     fail(ctx, ['monthlySalary'], `The minimum monthly salary for a loan is ${formatINR(MIN_MONTHLY_SALARY)}.`);
   }
+  checkPreviousEmployers(ctx, job.previousEmployers, job.yearsOfExperience);
 });
 
 const businessFields = {
