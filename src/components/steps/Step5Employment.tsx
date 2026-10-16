@@ -7,9 +7,7 @@ import { COMPANY_SUGGESTIONS } from '../../constants/companies';
 import { BUSINESS_TYPES } from '../../schemas/step5Schema';
 import { useApplicationStore } from '../../store/applicationStore';
 import type { EmploymentType } from '../../types/application';
-import {
-  digitsOnly, formatPreservingCaret, isAlphanumeric, isDigit, upperAlphanumeric,
-} from '../../utils/inputFormatting';
+import { formatPreservingCaret, isAlphanumeric, upperAlphanumeric } from '../../utils/inputFormatting';
 import { AddressFields } from '../common/AddressFields';
 import { Button } from '../common/Button';
 import { Collapse } from '../common/Collapse';
@@ -26,14 +24,11 @@ import { useStepForm } from '../wizard/useStepForm';
 import {
   EMPLOYMENT_LABELS, emptyValues, fieldsLostOnSwitch, hasDataToLose,
 } from './employmentBranches';
+import { formatYears, yearsValue } from './yearsInput';
 
-const formatYears = (event: FormEvent<HTMLInputElement>) => {
-  formatPreservingCaret(event.currentTarget, digitsOnly(2), isDigit);
-};
 const formatGstin = (event: FormEvent<HTMLInputElement>) => {
   formatPreservingCaret(event.currentTarget, upperAlphanumeric(15), isAlphanumeric);
 };
-const yearsValue = (value: string | number | null) => (value === '' || value === null ? null : Number(value));
 
 export default function Step5Employment() {
   const form = useStepForm('employment');
