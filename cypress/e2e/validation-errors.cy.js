@@ -4,7 +4,7 @@ const isoDate = (date) => [
   String(date.getDate()).padStart(2, '0'),
 ].join('-');
 
-describe('Validation errors — one journey per step', () => {
+describe('Validation errors — one test per step', () => {
   let personal;
   before(() => {
     cy.fixture('valid-personal-loan.json').then((data) => {
@@ -108,44 +108,123 @@ describe('Validation errors — one journey per step', () => {
     cy.contains('Enter the rent you pay each month.').should('be.visible');
   });
 
-  it('Steps 5–8: income minimum, missing documents, signature and consents', () => {
-    cy.fillStep1(personal.loan);
-    cy.continueStep();
-    cy.fillStep2(personal.personal);
-    cy.continueStep();
-    cy.fillStep3(personal.kyc);
-    cy.continueStep();
-    cy.fillStep4(personal.address);
-    cy.continueStep();
-
+  it('Step 5: employment type, salary minimum and previous jobs that exceed total experience', () => {
+    cy.resumeAt('employment', {
+      edit: (data) => {
+        Object.assign(data.employment, {
+          employmentType: '', companyName: '', designation: '', monthlySalary: null, yearsOfExperience: null,
+        });
+      },
+    });
     cy.waitForStep('Work and income');
     cy.continueStep();
     cy.contains('Choose how you earn your income.').should('be.visible');
-    cy.fillStep5({ ...personal.employment, monthlySalary: '12000' });
+
+    cy.contains('label', 'Salaried').click();
+    cy.typeInto('companyName', 'Tata Consultancy Services');
+    cy.typeInto('designation', 'Business Analyst');
+    cy.typeInto('monthlySalary', '12000');
+    cy.typeInto('yearsOfExperience', '2');
     cy.continueStep();
     cy.contains('The minimum monthly salary for a loan is ₹15,000.').should('be.visible');
-    cy.typeInto('monthlySalary', personal.employment.monthlySalary);
-    cy.continueStep();
 
+    cy.contains('button', 'Add a previous employer').click();
+    cy.continueStep();
+    cy.contains('[role="group"]', 'Previous employer 1').within(() => {
+      cy.contains('Enter the company name.').should('be.visible');
+      cy.contains('Enter the job title you held.').should('be.visible');
+    });
+    cy.typeInto('previousEmployers.0.companyName', 'Wipro');
+    cy.typeInto('previousEmployers.0.designation', 'Analyst');
+    cy.typeInto('previousEmployers.0.years', '5');
+    cy.contains('Your previous jobs add up to 5 years, more than the 2 years of total experience entered.')
+      .should('be.visible');
+
+    cy.typeInto('yearsOfExperience', '7');
+    cy.typeInto('monthlySalary', '85000');
+    cy.contains('Your previous jobs add up to').should('not.exist');
+    cy.continueStep();
     cy.waitForStep('Documents and signature');
-    cy.continueStep();
-    cy.contains('Upload your Aadhaar card.').should('be.visible');
-    cy.contains('Upload your salary slips.').should('be.visible');
-    cy.contains('Sign the application.').should('be.visible');
-    cy.uploadDocument('aadhaarCard', 'photo.jpg');
-    cy.contains('Add the other side of your Aadhaar card', { timeout: 10000 }).should('be.visible');
+  });
 
-    cy.uploadDocument('aadhaarCard', 'photo.jpg');
-    cy.contains('Add the other side of your Aadhaar card').should('not.exist');
-    cy.fillStep7({
-      salarySlips: 'sample.pdf', bankStatements: 'sample.pdf', photograph: 'photo.jpg',
-    }, personal.personal.fullName);
+  it('Step 6: every co-applicant field, and a co-applicant who is really the applicant', () => {
+    cy.resumeAt('coApplicant', {
+      loanType: 'home',
+      edit: (data) => {
+        Object.assign(data.coApplicant, {
+          fullName: '', relationship: '', pan: '', panVerified: false, monthlyIncome: null, consent: false, signature: '',
+        });
+      },
+    });
+    cy.waitForStep('Add a co-applicant');
     cy.continueStep();
+    cy.contains("Enter your co-applicant's full name.").should('be.visible');
+    // Step 2 → Step 6: the seeded applicant is married, so Spouse is pre-selected.
+    cy.get('[name="relationship"]').should('have.value', 'spouse');
+    cy.contains("Enter your co-applicant's PAN.").should('be.visible');
+    cy.contains("Enter your co-applicant's monthly income (0 if they have none).").should('be.visible');
+    cy.contains('Your co-applicant must give their consent to continue.').should('be.visible');
+    cy.contains('Your co-applicant needs to sign.').should('be.visible');
+
+    // The seeded applicant is Asha Verma, PAN ABCPE1234F.
+    cy.typeInto('fullName', 'Asha Verma');
+    cy.contains('Your co-applicant must be a different person from you.').should('be.visible');
+    cy.typeInto('pan', 'ABCPE1234F');
+    cy.contains('Your co-applicant needs their own PAN — this one matches yours.').should('be.visible');
+
+    cy.typeInto('fullName', 'Ravi Verma');
+    cy.contains('must be a different person').should('not.exist');
+    cy.contains('h1', 'Add a co-applicant');
+  });
+
+  it('Step 7: missing documents and signature, a wrong file type and a one-sided Aadhaar', () => {
+    cy.fixture('valid-personal-loan.json').then(({ documents, personal: person }) => {
+      cy.resumeAt('documents', {
+        edit: (data) => {
+          Object.assign(data.documents, { files: {}, signature: '', signatureMethod: '' });
+        },
+      });
+      cy.waitForStep('Documents and signature');
+      cy.continueStep();
+      cy.contains('Upload your Aadhaar card.').should('be.visible');
+      cy.contains('Upload your salary slips.').should('be.visible');
+      cy.contains('Sign the application.').should('be.visible');
+
+      cy.uploadDocument('salarySlips', 'notes.txt');
+      cy.contains('“notes.txt” is not a PDF file. Choose a PDF instead.').should('be.visible');
+
+      cy.uploadDocument('aadhaarCard', 'photo.jpg');
+      cy.contains('Add the other side of your Aadhaar card', { timeout: 10000 }).should('be.visible');
+      cy.uploadDocument('aadhaarCard', 'photo.jpg');
+      cy.contains('Add the other side of your Aadhaar card').should('not.exist');
+
+      const { aadhaarCard, ...rest } = documents;
+      cy.fillStep7(rest, person.fullName);
+      cy.continueStep();
+      cy.waitForStep('Review and submit');
+    });
+  });
+
+  it('Step 8: submit stays disabled until every consent and the high-EMI warning are acknowledged', () => {
+    // ₹16,000 a month against a ₹3 lakh, 36-month loan: the EMI is over half the income.
+    cy.resumeAt('review', {
+      edit: (data) => {
+        Object.assign(data.employment, { monthlySalary: 16_000 });
+      },
+    });
     cy.waitForStep('Review and submit');
     cy.get('[data-testid="submit-application"]').should('be.disabled')
       .and('have.attr', 'aria-describedby');
-    cy.get('[data-testid="submit-panel"]').should('contain', 'Tick the 4 remaining consents.');
+    cy.get('[data-testid="submit-panel"]').should('contain', 'Tick the 4 remaining consents.')
+      .and('contain', 'Acknowledge the high EMI warning.');
+
     cy.tickConsent(/true, complete and accurate/);
     cy.get('[data-testid="submit-panel"]').should('contain', 'Tick the 3 remaining consents.');
+    cy.fillStep8();
+    cy.get('[data-testid="submit-panel"]').should('not.contain', 'remaining consent');
+    cy.get('[data-testid="submit-application"]').should('be.disabled');
+
+    cy.tickConsent(/more than half of my monthly income/);
+    cy.get('[data-testid="submit-application"]').should('be.enabled');
   });
 });
