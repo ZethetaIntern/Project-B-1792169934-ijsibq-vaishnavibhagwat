@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useTransition,
   type FormEvent,
   type ReactNode,
 } from 'react';
@@ -78,7 +79,22 @@ export function Wizard({ onSaveDraft }: WizardProps) {
   const steps = useMemo(() => getActiveSteps(data), [data]);
   const currentStepId = resolveActiveStepId(storedStepId, data);
   const currentIndex = Math.max(steps.findIndex((step) => step.id === currentStepId), 0);
-  const reachableIndex = useMemo(() => getReachableIndex(steps, data), [steps, data]);
+
+  // Cross-step validation — every step's schema against the latest answers — runs in a
+  // transition: keystrokes stay urgent while this lower-priority render catches up,
+  // and React drops stale passes when the person keeps typing.
+  const [isRevalidating, startRevalidation] = useTransition();
+  const [validatedData, setValidatedData] = useState(data);
+  useEffect(() => useApplicationStore.subscribe((state, previous) => {
+    if (state.data !== previous.data) startRevalidation(() => setValidatedData(state.data));
+  }), []);
+  const reachableStepId = useMemo(() => {
+    const validatedSteps = getActiveSteps(validatedData);
+    return validatedSteps[getReachableIndex(validatedSteps, validatedData)]?.id;
+  }, [validatedData]);
+  const validatedIndex = steps.findIndex((step) => step.id === reachableStepId);
+  // Until a pass catches up with a step being added or removed, keep the open one.
+  const reachableIndex = validatedIndex >= 0 ? validatedIndex : currentIndex;
   const meta = steps[currentIndex];
   const StepComponent = STEP_COMPONENTS[currentStepId];
   // Stable element: live store updates (e.g. typed income) re-render the panel, not the form.
@@ -228,6 +244,7 @@ export function Wizard({ onSaveDraft }: WizardProps) {
         steps={steps}
         currentIndex={currentIndex}
         reachableIndex={reachableIndex}
+        revalidating={isRevalidating}
         onSelect={handleSelect}
       />
 
