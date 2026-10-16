@@ -29,6 +29,9 @@ export const MIN_MONTHLY_SALARY = 15_000;
 export const MIN_ANNUAL_TURNOVER = 3_00_000;
 export const MIN_YEARS_IN_BUSINESS = 2;
 
+/** Salaried applicants may list up to this many past jobs on Step 5. */
+export const MAX_PREVIOUS_EMPLOYERS = 3;
+
 /** Passport field appears only for Home Loans above ₹50 lakh. */
 export const PASSPORT_REQUIRED_HOME_LOAN_AMOUNT = 50_00_000;
 

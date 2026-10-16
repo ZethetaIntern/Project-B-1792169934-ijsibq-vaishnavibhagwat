@@ -109,6 +109,12 @@ function addressItems({ address }: ApplicationData): SummaryItem[] {
   ];
 }
 
+function yearsAt(years: number | null): string {
+  if (years === null) return '';
+  if (years < 1) return 'less than a year';
+  return years === 1 ? '1 year' : `${years} years`;
+}
+
 function employmentItems({ employment }: ApplicationData): SummaryItem[] {
   const type = employment.employmentType;
   const items: SummaryItem[] = [
@@ -121,6 +127,10 @@ function employmentItems({ employment }: ApplicationData): SummaryItem[] {
       { label: 'Company', value: employment.companyName },
       { label: 'Designation', value: employment.designation },
       income('Monthly net salary', employment.monthlySalary),
+      ...employment.previousEmployers.map((job, index) => ({
+        label: `Previous employer ${index + 1}`,
+        value: `${job.companyName}, ${job.designation} (${yearsAt(job.years)})`,
+      })),
     ];
   }
   const businessType = BUSINESS_TYPES.find((option) => option.value === employment.businessType);

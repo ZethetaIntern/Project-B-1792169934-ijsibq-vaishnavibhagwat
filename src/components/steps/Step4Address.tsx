@@ -2,7 +2,6 @@ import type { FormEvent } from 'react';
 import { Controller, FormProvider, useWatch } from 'react-hook-form';
 import { ADDRESS_PROOF_RULES } from '../../constants/documents';
 import { RESIDENCE_LABELS, toOptions } from '../../constants/labels';
-import { digitsOnly, formatPreservingCaret, isDigit } from '../../utils/inputFormatting';
 import { AddressFields } from '../common/AddressFields';
 import { Checkbox } from '../common/Checkbox';
 import { Collapse } from '../common/Collapse';
@@ -13,12 +12,9 @@ import { TextField } from '../common/Input';
 import { Select } from '../common/Select';
 import { useFieldStatus } from '../wizard/useFieldStatus';
 import { useStepForm } from '../wizard/useStepForm';
+import { formatYears, yearsValue } from './yearsInput';
 
 const RESIDENCE_OPTIONS = toOptions(RESIDENCE_LABELS);
-
-const formatYears = (event: FormEvent<HTMLInputElement>) => {
-  formatPreservingCaret(event.currentTarget, digitsOnly(2), isDigit);
-};
 
 export default function Step4Address() {
   const form = useStepForm('address');
@@ -60,9 +56,7 @@ export default function Step4Address() {
               {...status('residenceType')}
             />
             <TextField
-              {...register('yearsAtCurrentAddress', {
-                setValueAs: (value: string | number | null) => (value === '' || value === null ? null : Number(value)),
-              })}
+              {...register('yearsAtCurrentAddress', { setValueAs: yearsValue })}
               onInput={formatYears}
               label="Years at this address"
               inputMode="numeric"

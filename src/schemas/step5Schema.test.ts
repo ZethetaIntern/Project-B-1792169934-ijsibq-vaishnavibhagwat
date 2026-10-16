@@ -71,10 +71,27 @@ describe('step 5 schema (discriminated union)', () => {
     });
   });
 
+  it('validates each previous employer and checks they fit within total experience', () => {
+    const wipro = { companyName: 'Wipro', designation: 'Analyst', years: 2 };
+    expect(errors({ ...salaried, previousEmployers: [wipro, { ...wipro, companyName: 'TCS', years: 3 }] })).toEqual({});
+    expect(errors({ ...salaried, previousEmployers: [{ companyName: '', designation: '', years: null }] })).toEqual({
+      'previousEmployers.0.companyName': 'Enter the company name.',
+      'previousEmployers.0.designation': 'Enter the job title you held.',
+      'previousEmployers.0.years': 'Enter your time at that company in whole years.',
+    });
+    const tooLong = [{ ...wipro, years: 4 }, { ...wipro, years: 3 }];
+    expect(errors({ ...salaried, previousEmployers: tooLong }).yearsOfExperience).toBe('Your previous jobs add up to 7 years, more than the 6 years of total experience entered.');
+    const four = Array(4).fill({ ...wipro, years: 1 });
+    expect(errors({ ...salaried, previousEmployers: four }).previousEmployers).toBe('List up to 3 previous employers.');
+  });
+
   it('accepts a business owner with a valid GSTIN and strips salaried fields', () => {
-    const result = run({ ...owner, companyName: 'Infosys', monthlySalary: 50_000 });
+    const result = run({
+      ...owner, companyName: 'Infosys', monthlySalary: 50_000, previousEmployers: [{ companyName: 'Wipro', designation: 'Analyst', years: 2 }],
+    });
     expect(result.success).toBe(true);
     expect(result.data).not.toHaveProperty('companyName');
+    expect(result.data).not.toHaveProperty('previousEmployers');
   });
 
   it('applies business rules: turnover ≥ ₹3L, ≥ 2 years, GSTIN, office address', () => {

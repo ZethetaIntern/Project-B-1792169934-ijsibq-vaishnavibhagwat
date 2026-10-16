@@ -3,7 +3,7 @@ import type { EmploymentDetails, EmploymentType } from '../../types/application'
 
 type BranchField = Exclude<keyof EmploymentDetails, 'employmentType' | 'yearsOfExperience'>;
 
-const SALARIED: readonly BranchField[] = ['companyName', 'designation', 'monthlySalary'];
+const SALARIED: readonly BranchField[] = ['companyName', 'designation', 'monthlySalary', 'previousEmployers'];
 const BUSINESS: readonly BranchField[] = [
   'businessName', 'businessType', 'annualTurnover', 'yearsInBusiness', 'monthlyIncome', 'officeAddress',
 ];

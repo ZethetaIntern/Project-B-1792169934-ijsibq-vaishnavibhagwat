@@ -87,6 +87,14 @@ export interface AddressDetails {
   addressProof: UploadedDocument[];
 }
 
+/** A past job listed by a salaried applicant (optional, up to three). */
+export interface PreviousEmployer {
+  companyName: string;
+  designation: string;
+  /** Whole years spent there; 0 means less than a year. */
+  years: number | null;
+}
+
 /**
  * Step 5 — employment and income. Stored flat; the Zod schema is a discriminated
  * union on `employmentType`, so only the active branch survives validation.
@@ -98,6 +106,7 @@ export interface EmploymentDetails {
   companyName: string;
   designation: string;
   monthlySalary: number | null;
+  previousEmployers: PreviousEmployer[];
   // Self-employed and business owner
   businessName: string;
   businessType: string;

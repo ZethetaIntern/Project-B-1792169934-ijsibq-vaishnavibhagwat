@@ -30,6 +30,36 @@ describe('Step 5 — employment', () => {
     expect(screen.getByRole('textbox', { name: /Business name/ })).toHaveValue('');
   });
 
+  it('adds, validates and removes previous employers (useFieldArray)', async () => {
+    const user = userEvent.setup();
+    await renderWizardAt('employment', createCompleteApplication());
+
+    await user.click(screen.getByRole('button', { name: 'Add a previous employer' }));
+    const first = screen.getByRole('group', { name: 'Previous employer 1' });
+    expect(within(first).getByRole('textbox', { name: /Company name/ })).toHaveFocus();
+
+    await user.click(continueButton());
+    expect(await within(first).findByText('Enter the company name.')).toBeInTheDocument();
+    expect(within(first).getByText('Enter the job title you held.')).toBeInTheDocument();
+
+    await user.type(within(first).getByRole('textbox', { name: /Company name/ }), 'Wipro');
+    await user.type(within(first).getByRole('textbox', { name: /Job title/ }), 'Analyst');
+    await user.type(within(first).getByRole('textbox', { name: /Years there/ }), '9');
+    expect(await screen.findByText(/previous jobs add up to 9 years, more than the 6 years/)).toBeInTheDocument();
+
+    await user.clear(within(first).getByRole('textbox', { name: /Years there/ }));
+    await user.type(within(first).getByRole('textbox', { name: /Years there/ }), '2');
+    await waitFor(() => expect(screen.queryByText(/previous jobs add up to/)).not.toBeInTheDocument());
+    expect(useApplicationStore.getState().data.employment.previousEmployers)
+      .toEqual([{ companyName: 'Wipro', designation: 'Analyst', years: 2 }]);
+
+    await user.click(screen.getByRole('button', { name: 'Add another' }));
+    await user.click(screen.getByRole('button', { name: 'Remove previous employer 2' }));
+    expect(screen.queryByRole('group', { name: 'Previous employer 2' })).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Add another' })).toHaveFocus());
+    expect(screen.getByText('Previous employer 2 removed.')).toBeInTheDocument();
+  });
+
   it('shows the business sub-form with GSTIN for a business owner', async () => {
     await renderWizardAt('employment', createScenario('business', 'businessOwner'));
     expect(screen.getByRole('textbox', { name: /GSTIN/ })).toBeInTheDocument();
