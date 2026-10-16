@@ -68,6 +68,14 @@ describe('buildReviewSections', () => {
     expect(item(data, 'address', 'Previous address')?.value).toBe(formatAddress(ADDRESS));
     expect(item(data, 'address', 'Years at this address')?.value).toBe('Less than a year');
 
+    expect(item(data, 'employment', 'Previous employer 1')).toBeUndefined();
+    data.employment.previousEmployers = [
+      { companyName: 'Wipro', designation: 'Analyst', years: 2 },
+      { companyName: 'TCS', designation: 'Trainee', years: 0 },
+    ];
+    expect(item(data, 'employment', 'Previous employer 1')?.value).toBe('Wipro, Analyst (2 years)');
+    expect(item(data, 'employment', 'Previous employer 2')?.value).toBe('TCS, Trainee (less than a year)');
+
     data.address.residenceType = 'owned';
     data.address.yearsAtCurrentAddress = 5;
     expect(item(data, 'address', 'Monthly rent')).toBeUndefined();

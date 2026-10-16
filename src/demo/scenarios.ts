@@ -52,6 +52,7 @@ function personalSalaried(): ApplicationData {
     companyName: 'Tata Consultancy Services',
     designation: 'Business Analyst',
     monthlySalary: 85_000,
+    previousEmployers: [{ companyName: 'Wipro', designation: 'Associate Analyst', years: 3 }],
   };
   return data;
 }
