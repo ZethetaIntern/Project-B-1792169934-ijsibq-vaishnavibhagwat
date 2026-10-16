@@ -3,6 +3,7 @@ import type { SubmissionReceipt } from '../store/applicationStore';
 import { createEmptyApplication } from '../store/initialApplication';
 import type { ApplicationData, DocumentTypeId } from '../types/application';
 import { getDocumentRequirements } from './documentRequirements';
+import { createUuid } from './ids';
 import { simulateRequest } from './simulate';
 
 /** Simulated round trip to the lender's API. */
@@ -39,6 +40,6 @@ export async function submitApplication(application: ApplicationData): Promise<S
   return simulateRequest(SUBMIT_LATENCY_MS, () => {
     // A real client would POST `payload` here; it is built so the shape is tested.
     if (!payload.loan.loanType) throw new Error('The application is incomplete.');
-    return { reference: crypto.randomUUID(), submittedAt: new Date().toISOString() };
+    return { reference: createUuid(), submittedAt: new Date().toISOString() };
   });
 }
