@@ -33,12 +33,12 @@ export function VerifiedPanField({
   const status = useFieldStatus(form);
   const entityKey = allowedEntities.join('');
   const validate = useCallback((value: string) => validatePan(value, entityKey.split('')), [entityKey]);
-  const check = useVerification('pan', { validate, initiallyVerified: Boolean(getValues(verifiedFlag)) });
   const pan = (useWatch({ control, name }) as string | undefined) ?? '';
+  const check = useVerification(pan, 'pan', { validate, initiallyVerified: Boolean(getValues(verifiedFlag)) });
 
   const verify = async () => {
     if (getValues(verifiedFlag)) return;
-    if (await check.verify(getValues(name))) {
+    if (await check.verify()) {
       setValue(verifiedFlag, true);
       trigger(name);
     }
@@ -60,8 +60,8 @@ export function VerifiedPanField({
             value={field.value}
             onChange={(event) => {
               field.onChange(event.target.value);
+              // A new value also resets `check` (useVerification watches the value).
               if (getValues(verifiedFlag)) setValue(verifiedFlag, false);
-              check.reset();
             }}
             onBlur={() => {
               field.onBlur();
