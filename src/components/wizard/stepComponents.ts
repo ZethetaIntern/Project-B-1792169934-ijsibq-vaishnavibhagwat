@@ -1,13 +1,13 @@
-import type { ComponentType, LazyExoticComponent } from 'react';
 import type { StepId } from '../../types/application';
-import { lazyWithRetry } from '../../utils/lazyWithRetry';
+import { lazyWithRetry, type PreloadableComponent } from '../../utils/lazyWithRetry';
 
 /**
  * Step components are code-split: only the open step's JavaScript is downloaded,
  * keeping the main chunk small for low-end devices on patchy networks. A dropped
  * chunk request is retried before the step reports that it could not load.
+ * The Wizard preloads the neighbouring steps, so moving between them never waits.
  */
-export const STEP_COMPONENTS: Record<StepId, LazyExoticComponent<ComponentType>> = {
+export const STEP_COMPONENTS: Record<StepId, PreloadableComponent> = {
   loan: lazyWithRetry(() => import('../steps/Step1LoanType')),
   personal: lazyWithRetry(() => import('../steps/Step2PersonalInfo')),
   kyc: lazyWithRetry(() => import('../steps/Step3KYC')),
