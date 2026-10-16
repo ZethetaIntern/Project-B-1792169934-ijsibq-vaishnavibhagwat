@@ -24,29 +24,52 @@ describe('Journey 14 — rapid navigation and hostile input', () => {
     cy.get('[name="fullName"]').should('have.value', '');
   });
 
-  it('keeps answers through a back-and-forth loop, then a loan type change adds Step 6', () => {
+  it('keeps every answer through 9 back-and-forth passes that change the loan type each time', () => {
+    const loans = [
+      {
+        type: 'Home Loan', key: 'home', amount: '4000000', shown: '40,00,000', tenureMonths: '240', purpose: 'ready-property', steps: 8,
+      },
+      {
+        type: 'Business Loan', key: 'business', amount: '1500000', shown: '15,00,000', tenureMonths: '60', purpose: 'working-capital', steps: 7,
+      },
+      {
+        type: 'Personal Loan', key: 'personal', amount: '300000', shown: '3,00,000', tenureMonths: '36', purpose: 'medical', steps: 7,
+      },
+    ];
+    const onlyDraftFor = (key) => cy.window().should((win) => {
+      const drafts = Object.keys(win.localStorage)
+        .filter((name) => name.startsWith('lendswift_draft_') && !name.endsWith('_meta'));
+      expect(drafts).to.deep.equal([`lendswift_draft_${key}`]);
+    });
+
     cy.fillStep1(data.loan);
     cy.continueStep();
     cy.waitForStep('About you');
     cy.typeInto('fullName', data.personal.fullName);
+    cy.typeInto('email', data.personal.email);
 
-    for (let round = 0; round < 5; round += 1) {
+    let previous = loans[2];
+    for (let pass = 0; pass < 9; pass += 1) {
+      const loan = loans[pass % loans.length];
       cy.get('button[aria-label="Back to previous step"]').click();
       cy.waitForStep('Choose your loan');
-      cy.continueStep();
-      cy.waitForStep('About you');
-      cy.get('[name="fullName"]').should('have.value', data.personal.fullName);
-    }
+      cy.get('[name="loanAmount"]').should('have.value', previous.shown);
 
-    cy.get('button[aria-label="Back to previous step"]').click();
-    cy.contains('label', 'Home Loan').click();
-    cy.typeInto('loanAmount', '4000000');
-    cy.get('[name="tenureMonths"]').select('240');
-    cy.get('[name="purpose"]').select('ready-property');
-    cy.continueStep();
-    cy.waitForStep('About you');
-    cy.contains('Step 2 of 8').should('be.visible');
-    cy.get('[name="fullName"]').should('have.value', data.personal.fullName);
+      cy.contains('label', loan.type).click();
+      cy.typeInto('loanAmount', loan.amount);
+      cy.get('[name="tenureMonths"]').select(loan.tenureMonths);
+      cy.get('[name="purpose"]').select(loan.purpose);
+      cy.continueStep();
+
+      cy.waitForStep('About you');
+      cy.contains(`Step 2 of ${loan.steps}`).should('be.visible');
+      cy.get('aside[aria-label="Application summary"]').should('contain', loan.type);
+      cy.get('[name="fullName"]').should('have.value', data.personal.fullName);
+      cy.get('[name="email"]').should('have.value', data.personal.email);
+      // The draft follows the loan type: one key, never a stale copy under the old type.
+      onlyDraftFor(loan.key);
+      previous = loan;
+    }
   });
 
   it('caps over-long input and rejects unsupported characters with a clear message', () => {
