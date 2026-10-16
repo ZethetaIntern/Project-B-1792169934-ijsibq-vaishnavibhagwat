@@ -9,6 +9,8 @@ interface ProgressBarProps {
   /** Furthest step the user may jump to (everything before it is complete). */
   reachableIndex: number;
   onSelect: (stepId: StepId) => void;
+  /** True while cross-step validation is catching up with the latest answers. */
+  revalidating?: boolean;
 }
 
 type SegmentState = 'complete' | 'current' | 'upcoming' | 'locked';
@@ -33,13 +35,16 @@ const STATE_LABEL: Record<SegmentState, string> = {
  * The `<nav>` label announces "step X of Y" to screen readers.
  */
 export function ProgressBar({
-  steps, currentIndex, reachableIndex, onSelect,
+  steps, currentIndex, reachableIndex, onSelect, revalidating = false,
 }: ProgressBarProps) {
   const total = steps.length;
   const current = steps[currentIndex];
 
   return (
-    <nav aria-label={`Application progress: step ${currentIndex + 1} of ${total}, ${current?.title ?? ''}`}>
+    <nav
+      aria-label={`Application progress: step ${currentIndex + 1} of ${total}, ${current?.title ?? ''}`}
+      aria-busy={revalidating || undefined}
+    >
       <ol className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}>
         {steps.map((step, index) => {
           const state = segmentState(index, currentIndex, reachableIndex);

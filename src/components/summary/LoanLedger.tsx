@@ -1,4 +1,4 @@
-import { useId, useMemo } from 'react';
+import { useDeferredValue, useId, useMemo } from 'react';
 import { getLoanProduct, MAX_EMI_TO_INCOME_RATIO } from '../../constants/loan';
 import { useApplicationStore } from '../../store/applicationStore';
 import { getApplicationEstimate } from '../../utils/applicationMetrics';
@@ -84,12 +84,13 @@ function AffordabilityMeter({ affordability }: { affordability: Affordability })
  * updates as the applicant types. Every figure is labelled as illustrative.
  */
 export function LoanLedger({ className }: { className?: string }) {
-  const application = useApplicationStore((state) => state.data);
-  const { loanType, loanAmount, tenureMonths } = application.loan;
+  // The ledger may lag a keystroke behind: typing in the form always wins.
+  const deferredApplication = useDeferredValue(useApplicationStore((state) => state.data));
+  const { loanType, loanAmount, tenureMonths } = deferredApplication.loan;
   const product = getLoanProduct(loanType);
   const { estimate, affordability } = useMemo(
-    () => getApplicationEstimate(application),
-    [application],
+    () => getApplicationEstimate(deferredApplication),
+    [deferredApplication],
   );
   const headingId = useId();
 
