@@ -24,6 +24,7 @@ import { useStepForm } from '../wizard/useStepForm';
 import {
   EMPLOYMENT_LABELS, emptyValues, fieldsLostOnSwitch, hasDataToLose,
 } from './employmentBranches';
+import { PreviousEmployers } from './PreviousEmployers';
 import { formatYears, yearsValue } from './yearsInput';
 
 const formatGstin = (event: FormEvent<HTMLInputElement>) => {
@@ -118,37 +119,40 @@ export default function Step5Employment() {
         <Collapse open={Boolean(employmentType)}>
           <div className="flex flex-col gap-10">
             <Collapse open={employmentType === 'salaried'}>
-              <FormSection title="Your job">
-                <Combobox
-                  {...register('companyName')}
-                  options={COMPANY_SUGGESTIONS}
-                  label="Company name"
-                  helpText="Start typing to see suggestions, or enter any employer."
-                  autoComplete="organization"
-                  maxLength={100}
-                  {...status('companyName')}
-                />
-                <TextField {...register('designation')} label="Designation" autoComplete="organization-title" maxLength={60} {...status('designation')} />
-                <Controller
-                  control={control}
-                  name="monthlySalary"
-                  render={({ field }) => (
-                    <CurrencyInput
-                      ref={field.ref}
-                      name={field.name}
-                      label="Monthly take-home salary"
-                      helpText="Net pay credited to your bank account each month (minimum ₹15,000)."
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      sensitive
-                      revealLabel="salary"
-                      maxDigits={9}
-                      {...status('monthlySalary')}
-                    />
-                  )}
-                />
-              </FormSection>
+              <div className="flex flex-col gap-10">
+                <FormSection title="Your job">
+                  <Combobox
+                    {...register('companyName')}
+                    options={COMPANY_SUGGESTIONS}
+                    label="Company name"
+                    helpText="Start typing to see suggestions, or enter any employer."
+                    autoComplete="organization"
+                    maxLength={100}
+                    {...status('companyName')}
+                  />
+                  <TextField {...register('designation')} label="Designation" autoComplete="organization-title" maxLength={60} {...status('designation')} />
+                  <Controller
+                    control={control}
+                    name="monthlySalary"
+                    render={({ field }) => (
+                      <CurrencyInput
+                        ref={field.ref}
+                        name={field.name}
+                        label="Monthly take-home salary"
+                        helpText="Net pay credited to your bank account each month (minimum ₹15,000)."
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onBlur={field.onBlur}
+                        sensitive
+                        revealLabel="salary"
+                        maxDigits={9}
+                        {...status('monthlySalary')}
+                      />
+                    )}
+                  />
+                </FormSection>
+                <PreviousEmployers />
+              </div>
             </Collapse>
 
             <Collapse open={isBusiness}>
