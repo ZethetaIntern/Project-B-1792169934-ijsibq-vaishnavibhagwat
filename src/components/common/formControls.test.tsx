@@ -139,6 +139,14 @@ describe('RadioGroup', () => {
     expect(onChange).toHaveBeenCalled();
     expect(screen.getByRole('alert')).toHaveTextContent('Select your gender');
   });
+
+  it('is only announced as invalid once there is an error, not while nothing is chosen', () => {
+    const options = [{ value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }];
+    const { rerender } = render(<RadioGroup name="gender" legend="Gender" options={options} />);
+    expect(screen.getByLabelText('Male')).toHaveAttribute('aria-invalid', 'false');
+    rerender(<RadioGroup name="gender" legend="Gender" options={options} error="Select your gender" />);
+    expect(screen.getByLabelText('Male')).toHaveAttribute('aria-invalid', 'true');
+  });
 });
 
 describe('Checkbox', () => {
