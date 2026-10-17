@@ -13,7 +13,7 @@ export function LandingHeader({ onStart }: { onStart: () => void }) {
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-canvas/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 sm:px-6">
-        <a href="#top" aria-label="LendSwift home" className="rounded-md">
+        <a href="#top" aria-label="LendSwift home" className="inline-flex min-h-11 min-w-11 items-center rounded-md">
           <Wordmark />
         </a>
         <nav aria-label="Sections" className="hidden md:block">

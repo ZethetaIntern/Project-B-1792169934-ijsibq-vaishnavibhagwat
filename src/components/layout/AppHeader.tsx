@@ -19,7 +19,7 @@ export function AppHeader({ title, actions }: AppHeaderProps) {
             event.preventDefault();
             navigateTo('landing');
           }}
-          className="rounded-md"
+          className="inline-flex min-h-11 min-w-11 items-center rounded-md"
           aria-label="LendSwift home"
         >
           <Wordmark compact />

@@ -61,7 +61,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((
       'inline-flex shrink-0 cursor-pointer items-center justify-center rounded-field font-medium whitespace-nowrap transition-[background-color,border-color,color,box-shadow,transform] duration-150 select-none',
       'active:translate-y-px disabled:cursor-not-allowed disabled:active:translate-y-0',
       variant !== 'link' && SIZE_CLASSES[size],
-      variant === 'link' && 'gap-1.5 text-[15px]',
+      // Links get no padding but still meet the 44px touch target on phones.
+      variant === 'link' && 'min-h-11 gap-1.5 text-[15px] sm:min-h-0',
       VARIANT_CLASSES[variant],
       fullWidth && 'w-full',
       className,
