@@ -14,7 +14,7 @@ const STEP_SUMMARIES: Record<string, string> = {
 /** The eight steps of the application as a vertical timeline (it is a real sequence). */
 export function HowItWorks() {
   return (
-    <section id="how-it-works" aria-labelledby="how-title" className="grid scroll-mt-28 gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+    <section id="how-it-works" aria-labelledby="how-title" className="grid scroll-mt-8 gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
       <div className="flex max-w-md flex-col gap-4">
         <h2 id="how-title" className="text-[28px] leading-tight font-semibold tracking-[-0.025em] text-ink sm:text-[34px]">
           Eight short steps, saved as you go

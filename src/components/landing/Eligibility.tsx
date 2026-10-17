@@ -27,7 +27,7 @@ const DOCUMENTS = [
 /** Who can apply, and what to have to hand before starting. */
 export function Eligibility() {
   return (
-    <section id="eligibility" aria-labelledby="eligibility-title" className="scroll-mt-28">
+    <section id="eligibility" aria-labelledby="eligibility-title" className="scroll-mt-8">
       <h2 id="eligibility-title" className="max-w-2xl text-[28px] leading-tight font-semibold tracking-[-0.025em] text-ink sm:text-[34px]">
         Check you can apply before you start
       </h2>

@@ -127,6 +127,11 @@
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
     scroll-behavior: smooth;
+    /* Room for the sticky header (64px) and the sticky step actions (~70px), so a
+       field scrolled into view by Tab, an anchor or an error is never hidden
+       under them (WCAG 2.4.11). */
+    scroll-padding-top: 5rem;
+    scroll-padding-bottom: 6rem;
   }
 
   body {

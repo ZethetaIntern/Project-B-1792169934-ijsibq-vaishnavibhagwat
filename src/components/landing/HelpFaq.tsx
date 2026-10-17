@@ -32,7 +32,7 @@ const QUESTIONS = [
 /** Common questions as native disclosure widgets (keyboard and screen-reader friendly). */
 export function HelpFaq() {
   return (
-    <section id="help" aria-labelledby="help-title" className="grid scroll-mt-28 gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+    <section id="help" aria-labelledby="help-title" className="grid scroll-mt-8 gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
       <div className="flex max-w-md flex-col gap-3">
         <h2 id="help-title" className="text-[28px] leading-tight font-semibold tracking-[-0.025em] text-ink sm:text-[34px]">
           Questions people ask

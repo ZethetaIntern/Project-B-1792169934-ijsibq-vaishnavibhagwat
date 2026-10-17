@@ -26,7 +26,7 @@ function coApplicantRule(product: LoanProduct): string {
 /** The three products side by side, so their limits can be compared at a glance. */
 export function LoanProducts({ onChoose }: { onChoose: (loanType: LoanType) => void }) {
   return (
-    <section id="loans" aria-labelledby="loans-title" className="scroll-mt-28">
+    <section id="loans" aria-labelledby="loans-title" className="scroll-mt-8">
       <div className="flex max-w-2xl flex-col gap-3">
         <h2 id="loans-title" className="text-[28px] leading-tight font-semibold tracking-[-0.025em] text-ink sm:text-[34px]">
           Three loans, one short application
