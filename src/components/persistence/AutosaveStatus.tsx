@@ -38,7 +38,7 @@ export function AutosaveStatus({ status, lastSavedAt, onRetry }: AutosaveStatusP
       <>
         <CloudOff aria-hidden="true" className="size-4 text-danger-ink" />
         <span className="text-danger-ink">Couldn&apos;t save</span>
-        <button type="button" onClick={onRetry} className="inline-flex min-h-11 min-w-11 items-center justify-center font-medium text-cobalt underline-offset-2 hover:underline sm:min-h-0 sm:min-w-0">
+        <button type="button" onClick={onRetry} className="inline-flex min-h-11 min-w-11 items-center justify-center font-medium text-cobalt underline-offset-2 hover:underline sm:pointer-fine:min-h-0 sm:pointer-fine:min-w-0">
           Retry
         </button>
       </>

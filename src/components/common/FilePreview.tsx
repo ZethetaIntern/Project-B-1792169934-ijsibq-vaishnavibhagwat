@@ -60,7 +60,7 @@ export function FilePreview({ file, onRemove }: FilePreviewProps) {
         size="sm"
         onClick={onRemove}
         aria-label={`Remove ${file.name}`}
-        className="w-11 px-0 text-slate hover:text-danger-ink sm:w-9"
+        className="w-11 px-0 text-slate hover:text-danger-ink sm:pointer-fine:w-9"
       >
         <Trash2 aria-hidden="true" className="size-4" />
       </Button>

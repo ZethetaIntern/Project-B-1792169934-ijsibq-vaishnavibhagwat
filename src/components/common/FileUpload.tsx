@@ -196,7 +196,7 @@ export function FileUpload({
             type="button"
             onClick={upload.dismissRejections}
             aria-label="Dismiss upload messages"
-            className="-m-1 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md hover:bg-danger/10 max-sm:-m-2.5 max-sm:size-11"
+            className="-m-2.5 flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md hover:bg-danger/10 sm:pointer-fine:-m-1 sm:pointer-fine:size-8"
           >
             <X aria-hidden="true" className="size-4" />
           </button>

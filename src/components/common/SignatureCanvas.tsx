@@ -152,7 +152,7 @@ export function SignatureCanvas({
                 aria-pressed={mode === option}
                 onClick={() => setMode(option)}
                 className={cn(
-                  'flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-sm font-medium transition-colors max-sm:min-h-11',
+                  'flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-medium transition-colors sm:pointer-fine:min-h-9',
                   mode === option ? 'bg-surface text-ink shadow-card' : 'text-slate hover:text-ink',
                 )}
               >
