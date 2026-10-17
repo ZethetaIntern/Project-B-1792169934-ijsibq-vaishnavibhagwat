@@ -1,9 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import App from './App';
+import { preloadCurrentRoute } from './routes';
 
 describe('App', () => {
-  it('renders the landing experience with a call to action', () => {
+  it('renders the landing experience with a call to action', async () => {
+    await preloadCurrentRoute();
     render(<App />);
     expect(screen.getByRole('heading', { level: 1, name: 'Your next chapter starts with a smarter loan.' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /start your application/i })).toBeInTheDocument();

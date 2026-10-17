@@ -2,23 +2,8 @@ import { Suspense } from 'react';
 import { LoadErrorBoundary } from './components/common/LoadErrorBoundary';
 import { ToastProvider } from './components/common/Toast';
 import { Spinner } from './components/common/Spinner';
-import { DemoLauncher } from './components/demo/DemoLauncher';
-import { LandingPage } from './components/landing/LandingPage';
-import { STEP_COMPONENTS } from './components/wizard/stepComponents';
-import { routeFromPath, useRoute } from './hooks/useRoute';
-import { STEP_ORDER } from './constants/steps';
-import { lazyWithRetry } from './utils/lazyWithRetry';
-
-const ApplicationWorkspace = lazyWithRetry(() => import('./components/layout/ApplicationWorkspace'));
-
-// Opening /apply directly: fetch the workspace and the step in the URL (else Step 1)
-// in parallel, instead of discovering the step only once the workspace has rendered.
-if (routeFromPath(window.location.pathname) === 'apply') {
-  const requested = new URLSearchParams(window.location.search).get('step');
-  const firstStep = STEP_ORDER.find((id) => id === requested) ?? 'loan';
-  ApplicationWorkspace.preload();
-  STEP_COMPONENTS[firstStep].preload();
-}
+import { useRoute } from './hooks/useRoute';
+import { ApplicationWorkspace, LandingRoute } from './routes';
 
 function RouteFallback() {
   return (
@@ -40,7 +25,7 @@ function App() {
       </a>
       <LoadErrorBoundary key={route} title="The application did not load">
         <Suspense fallback={<RouteFallback />}>
-          {route === 'apply' ? <ApplicationWorkspace /> : <LandingPage secondaryAction={<DemoLauncher />} />}
+          {route === 'apply' ? <ApplicationWorkspace /> : <LandingRoute />}
         </Suspense>
       </LoadErrorBoundary>
     </ToastProvider>
