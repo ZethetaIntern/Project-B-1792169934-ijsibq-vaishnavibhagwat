@@ -94,4 +94,27 @@ describe('Journey 13 — keyboard-only navigation', () => {
     }
     cy.then(() => expect(checked.size, 'fields checked').to.be.at.least(8));
   });
+
+  it('keeps focus on the field after verifying it by keyboard, and announces the result', () => {
+    cy.resumeAt('personal', {
+      edit: (data) => Object.assign(data.personal, { mobileVerified: false }),
+    });
+    cy.get('button[aria-label="Verify mobile number"]').focus();
+    cy.realPress('Enter');
+    cy.get('[data-testid="demo-otp"]').invoke('text').then((code) => {
+      cy.focused().should('have.attr', 'autocomplete', 'one-time-code');
+      cy.realType(code.trim());
+      cy.realPress('Enter');
+    });
+    cy.get('input[autocomplete="one-time-code"]', { timeout: 6000 }).should('not.exist');
+    cy.focused().should('have.attr', 'name', 'mobile');
+    cy.contains('[role="status"]', 'Mobile number verified.').should('exist');
+
+    cy.resumeAt('kyc', { edit: (data) => Object.assign(data.kyc, { panVerified: false }) });
+    cy.get('button[aria-label="Verify PAN"]').focus();
+    cy.realPress('Enter');
+    cy.focused().should('have.attr', 'name', 'pan');
+    cy.contains('[role="status"]', 'PAN verified.', { timeout: 6000 }).should('exist');
+    cy.focused().should('have.attr', 'name', 'pan');
+  });
 });

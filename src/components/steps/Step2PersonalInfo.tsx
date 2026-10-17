@@ -1,5 +1,5 @@
 import { BadgeCheck, Send } from 'lucide-react';
-import type { FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useWatch } from 'react-hook-form';
 import { GENDER_LABELS, MARITAL_STATUS_LABELS, toOptions } from '../../constants/labels';
 import { MIN_APPLICANT_AGE } from '../../constants/loan';
@@ -38,12 +38,20 @@ const VerifiedBadge = (
 export default function Step2PersonalInfo() {
   const form = useStepForm('personal');
   const {
-    register, control, getValues, setValue, trigger,
+    register, control, getValues, setValue, setFocus, trigger,
   } = form;
   const status = useFieldStatus(form);
   const { goTo } = useWizardNavigation();
   const mobileOtp = useOtpVerification();
   const emailOtp = useOtpVerification();
+  const [verifiedNotice, setVerifiedNotice] = useState('');
+
+  // The code panel (and the focus inside it) disappears once a code is accepted,
+  // so focus returns to the verified field and the result is announced.
+  const confirmVerified = (field: 'mobile' | 'email', notice: string) => {
+    setFocus(field);
+    setVerifiedNotice(notice);
+  };
 
   const [mobile, email, mobileVerified, emailVerified] = useWatch({
     control,
@@ -181,6 +189,7 @@ export default function Step2PersonalInfo() {
             onVerified={() => {
               setValue('mobileVerified', true);
               trigger('mobile');
+              confirmVerified('mobile', 'Mobile number verified.');
             }}
           />
         </div>
@@ -203,7 +212,10 @@ export default function Step2PersonalInfo() {
           <OtpPanel
             otp={emailOtp}
             destination={email.trim()}
-            onVerified={() => setValue('emailVerified', true)}
+            onVerified={() => {
+              setValue('emailVerified', true);
+              confirmVerified('email', 'Email address verified.');
+            }}
           />
         </div>
 
@@ -220,6 +232,7 @@ export default function Step2PersonalInfo() {
           helpText="Must be different from your primary number."
           {...status('alternateMobile')}
         />
+        <p role="status" className="sr-only">{verifiedNotice}</p>
       </FormSection>
     </div>
   );

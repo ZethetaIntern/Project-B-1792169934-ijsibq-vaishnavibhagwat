@@ -104,6 +104,8 @@ export const RadioGroup = forwardRef<HTMLInputElement, RadioGroupProps>((
                 option.disabled && 'cursor-not-allowed',
               )}
             >
+              {/* eslint-disable-next-line jsx-a11y/role-supports-aria-props -- aria-invalid
+                  is global in axe and the accessibility APIs; ARIA 1.2 only deprecates it here */}
               <input
                 {...inputProps}
                 ref={ref}
@@ -115,6 +117,9 @@ export const RadioGroup = forwardRef<HTMLInputElement, RadioGroupProps>((
                 checked={isControlled ? value === option.value : undefined}
                 defaultChecked={hasDefault ? defaultValue === option.value : undefined}
                 required={!optional}
+                // Explicit, because an unchosen required radio is natively invalid and
+                // screen readers would say "invalid" before the person has done anything.
+                aria-invalid={Boolean(error)}
                 aria-describedby={describedBy || undefined}
                 data-invalid={error ? true : undefined}
                 className="peer sr-only"
