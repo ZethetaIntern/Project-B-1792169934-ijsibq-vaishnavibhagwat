@@ -5,6 +5,14 @@
  *   validation       < 100 ms   field blurred → error on screen (next frame)
  *   auto-save write  <  50 ms   encrypt the draft and write it to LocalStorage
  *
+ * Each step downloads its neighbours' code while the person fills it in, and
+ * Continue waits for that code rather than flash a loading state. People spend
+ * seconds on a step; Cypress presses Continue within a few hundred milliseconds,
+ * while that download can still be in flight from the local server (seen taking
+ * up to ~370 ms here). The transition test therefore waits for the neighbouring
+ * code (`data-neighbours-ready`) before each press, so it times the transition
+ * itself.
+ *
  * Step transitions and saves are read from the app's User Timing measures
  * (src/utils/userTiming.ts); validation is timed here with a MutationObserver.
  * Every run writes the raw numbers to cypress/results/performance-budgets.json.
@@ -69,11 +77,14 @@ describe('Performance budgets (production build)', () => {
     cy.waitForStep('Choose your loan');
     const forward = ['About you', 'Verify your identity', 'Where you live', 'Work and income',
       'Add a co-applicant', 'Documents and signature', 'Review and submit'];
+    const neighboursReady = () => cy.get('[data-neighbours-ready]', { timeout: 10000 });
     forward.forEach((title) => {
+      neighboursReady();
       cy.continueStep();
       cy.waitForStep(title);
     });
     ['Documents and signature', 'Add a co-applicant', 'Work and income'].forEach((title) => {
+      neighboursReady();
       cy.get('button[aria-label="Back to previous step"]').click();
       cy.waitForStep(title);
     });

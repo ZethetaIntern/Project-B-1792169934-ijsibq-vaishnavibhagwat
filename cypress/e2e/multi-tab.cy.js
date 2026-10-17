@@ -79,7 +79,10 @@ describe('Three tabs open at once', () => {
       });
     });
 
-    // Resuming saves too, so start from a clean slate in every tab.
+    // Resuming saves too, so the earlier tabs are warned: A by B and C, B by C.
+    // Storage events arrive a little after the write, so wait until C's warning
+    // has reached B before starting from a clean slate in every tab.
+    inTab('B', () => cy.contains('[role="alert"]', BANNER).should('be.visible'));
     dismissBannerIfShown();
     inTab('B', dismissBannerIfShown);
     inTab('C', dismissBannerIfShown);

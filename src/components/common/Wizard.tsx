@@ -243,13 +243,15 @@ export function Wizard({ onSaveDraft }: WizardProps) {
   const handleStepMounted = useCallback((stepId: StepId) => {
     setReadyStepId(stepId);
     // Fetch the neighbouring steps now, so Continue and Back never wait for code.
+    // `data-neighbours-ready` marks when it has arrived (used by the E2E timings).
     const active = getActiveSteps(getApplicationSnapshot().data);
     const index = active.findIndex((step) => step.id === stepId);
-    [active[index + 1], active[index - 1]].forEach((step) => {
-      if (step) STEP_COMPONENTS[step.id].preload();
-    });
+    const container = containerRef.current;
+    Promise.all([active[index + 1], active[index - 1]]
+      .flatMap((step) => (step ? [STEP_COMPONENTS[step.id].preload()] : [])))
+      .then(() => container?.setAttribute('data-neighbours-ready', 'true'));
     // Marks the step as interactive (form subscriptions are live) — used by E2E tests.
-    containerRef.current?.setAttribute('data-step-ready', 'true');
+    container?.setAttribute('data-step-ready', 'true');
     if (transitionPendingRef.current) {
       transitionPendingRef.current = false;
       endSpan(STEP_TRANSITION);

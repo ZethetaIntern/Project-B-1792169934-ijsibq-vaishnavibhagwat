@@ -26,7 +26,7 @@ Results on 17 Oct 2026 (1280×900, Chrome 155):
 | Demo launcher (dialog) | 0 | 1 | 7 | 0 | 0 | 2 | none |
 | Step 1 · Choose your loan | 7 | 3 | 16 | 0 | 0 | 5 | none |
 | Step 1 · after Continue with nothing filled | 7 | 3 | 16 | 0 | 3 | 5 | none |
-| Step 2 · About you | 10 | 6 | 32 | 5 | 0 | 13 | none |
+| Step 2 · About you | 10 | 6 | 32 | 5 | 0 | 14 | none |
 | Step 3 · Verify your identity | 10 | 6 | 20 | 2 | 0 | 10 | none |
 | Step 4 · Where you live | 11 | 7 | 64 | 4 | 0 | 15 | none |
 | Step 5 · Work and income | 9 | 5 | 23 | 4 | 0 | 11 | none |

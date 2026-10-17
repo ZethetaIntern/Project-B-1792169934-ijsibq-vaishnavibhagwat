@@ -31,9 +31,9 @@ gently, saves as you go and works from 320 px phones up.
 | 2 · About you | Name as on PAN, age 21–65 with exact-birthday handling, simulated mobile OTP (code shown on screen), optional email OTP |
 | 3 · Identity | PAN format + 4th-character entity check, Aadhaar Verhoeff checksum, 1.5 s simulated verification, explicit Aadhaar consent, passport field for Home Loans above ₹50 lakh |
 | 4 · Address | PIN-code lookup (100+ PINs, all 28 states and 8 UTs) fills city and state, rent for tenants, previous address under one year, permanent address, optional proof of address |
-| 5 · Income | Salaried / self-employed / business owner sub-forms (discriminated union), GSTIN checksum, switching asks before clearing the other branch, Business Loans refuse salaried |
+| 5 · Income | Salaried / self-employed / business owner sub-forms (discriminated union), GSTIN checksum, switching asks before clearing the other branch, Business Loans refuse salaried, salaried applicants can add up to three previous employers |
 | 6 · Co-applicant | Appears only when needed (Personal > ₹5 lakh, all Home, Business > ₹20 lakh), Spouse default when married, PAN verification, consent and signature |
-| 7 · Documents | Requirements change with loan, employment and PAN status; drag-and-drop; type, content, size and count checks; photos compressed on the device; progress and retry; encrypted IndexedDB vault for crash recovery; e-signature (draw or type) |
+| 7 · Documents | Requirements change with loan, employment and PAN status; drag-and-drop; type, content, size and count checks; photos compressed on the device; progress and retry; encrypted IndexedDB vault for crash recovery; e-signature (draw with `react-signature-canvas`, or type) |
 | 8 · Review | Key Fact Statement with APR, editable section summaries with masked PAN/Aadhaar/income, four separate unticked consents, extra acknowledgement when EMI > 50% of income, cooling-off, grievance officer and RBI Ombudsman path, gated submit, UUID reference, PDF summary |
 
 Across the flow: encrypted auto-save (AES-256-GCM, 72-hour expiry, tamper detection),
@@ -99,23 +99,32 @@ A full walkthrough is in **[ARCHITECTURE.md](ARCHITECTURE.md)**. In short:
   schema factory that carries all 14 cross-step dependencies.
 - **Zustand for the application store.** Small, selector-based, no provider; Back never loses
   data because steps commit to the store and re-seed from it.
-- **TypeScript** throughout (the brief lists it as a bonus) with an `ApplicationData` type that
-  has one slice per step.
+- **TypeScript, so `.ts`/`.tsx` files.** The brief's file names are kept (`Step3KYC`,
+  `schemaFactory`, `useAutoSave`…) with TypeScript extensions: TypeScript is a listed bonus,
+  and one `ApplicationData` type with a slice per step lets the compiler catch a rule that
+  reads the wrong step.
+- **React 19 concurrency.** Cross-step revalidation runs in `useTransition`, and the loan
+  ledger and EMI calculator read `useDeferredValue`, so typing never waits for them.
 - **Encrypted local persistence.** Drafts in LocalStorage carry metadata only; file binaries
   live in an encrypted IndexedDB vault so a few scans never exhaust the ~5 MB quota. Where
   IndexedDB is unavailable, files fall back to encrypted base64 in LocalStorage beside the
   draft (the brief's approach), capped at 2 million characters so the draft always fits.
-- **Code splitting.** Each step, the workspace and jsPDF load on demand; failed chunk downloads
-  are retried and, if still failing, the person gets a safe reload.
+- **Code splitting.** The landing page, the workspace, each step and jsPDF load on demand; the
+  HTML preloads the opened page's chunks alongside the main bundle, and each step preloads its
+  neighbours. Failed chunk downloads are retried and, if still failing, the person gets a safe
+  reload.
 
 ## Testing
 
 | Suite | Count | Result (latest run) |
 | --- | --- | --- |
-| Unit and integration (Vitest + Testing Library) | 52 files, 338 tests | all passing |
-| Coverage (`npm run test:coverage`) | statements 85.9%, lines 87.8%, functions 84.5%, branches 80.0% | every metric at or above the 80% target |
-| End-to-end (Cypress 15 + cypress-axe) | 12 spec files, 33 tests | 33 passing, retries off |
+| Unit and integration (Vitest + Testing Library) | 57 files, 364 tests | all passing |
+| Coverage (`npm run test:coverage`) | statements 86.0%, lines 87.7%, functions 84.8%, branches 80.6% | every metric at or above the 80% target |
+| End-to-end (Cypress 15 + cypress-axe, Electron 138) | 16 spec files, 61 tests | 61 passing with retries turned off |
 | Lint (`eslint .`) and types (`tsc -b`) | | clean |
+
+Latest run: 17 October 2026. `cypress.config.js` keeps one retry for CI; the figure above
+is from a run with retries set to 0.
 
 The Cypress specs map to the brief's journeys:
 
@@ -128,36 +137,77 @@ The Cypress specs map to the brief's journeys:
 | 10 Upload, compression, rejection, removal | `file-upload` |
 | 11 E-signature draw, clear, blur shield, review | `e-signature` |
 | 12 Auto-save, resume, start fresh, tampered draft | `auto-save-resume` |
-| 13 Keyboard only (skip link, radios, Enter, focus on error, dialog trap) | `keyboard-navigation` |
+| 13 Keyboard only (skip link, radios, Enter, focus on error, dialog trap, focus never hidden under the sticky bars, focus kept while a field is verified) | `keyboard-navigation` |
 | 14 Rapid clicks, back/forward loops, hostile input, double submit | `stress-test` |
 | axe WCAG 2.1 A/AA on the landing page, every step, error states and success | `accessibility` |
+| The same application in three tabs (warnings, last writer wins, one draft per loan type) | `multi-tab` |
+| Budgets: step transition, validation after blur, auto-save write | `performance-budgets` |
+| 44 × 44 px touch targets on phones and tablets, both ways up (touch emulation) | `touch-targets` |
+| No horizontal scrolling from 320 to 1920 px, portrait and landscape | `responsive-layout` |
 
-Custom commands (`cypress/support/commands.js`) include `fillStep1` … `fillStep8`; fixtures are
+Custom commands (`cypress/support/commands.js`) include `fillStep1` … `fillStep8`, and
+`cy.resumeAt(step)` opens any step from a seeded encrypted draft; fixtures are
 `valid-personal-loan.json`, `valid-home-loan.json`, `valid-business-loan.json` plus sample files.
+
+Other checks, run by hand (each script's header says how):
+
+- `scripts/legacy-browser-smoke.cjs`: a journey on Chromium 90, Firefox 87 and WebKit 14.2
+  (Safari 14) through Playwright 1.10, covering styles, fonts, Step 1 → 2, saving and resuming.
+- `scripts/lighthouse-accessibility.mjs`: Lighthouse accessibility on the landing page and every step.
+- `scripts/accessibility-tree-audit.mjs`: names, landmarks, headings, error descriptions and live
+  regions in the accessibility tree; see [docs/screen-reader-checklist.md](docs/screen-reader-checklist.md).
 
 ## Performance and accessibility
 
-Lighthouse 12, mobile profile with simulated slow 4G, production build, median of three runs:
+Lighthouse 12.8, mobile profile (simulated slow 4G, 4× CPU slowdown), production build, median
+of five runs on 17 October 2026:
 
-| Page | Performance | Accessibility | Best practices | SEO | LCP | CLS |
-| --- | --- | --- | --- | --- | --- | --- |
-| Landing (`/`) | 92 | 100 | 100 | 100 | 2.4 s | 0.035 |
-| Application (`/apply`) | 80 | 100 | 100 | 100 | 3.5 s | 0 |
+| Page | Performance | Accessibility | Best practices | SEO | LCP | TBT | CLS |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Landing (`/`) | 97 | 100 | 100 | 100 | 2.3 s | 57 ms | 0.013 |
+| Application (`/apply`) | 87 | 100 | 100 | 100 | 3.4 s | 89 ms | 0 |
 
-- Main JavaScript chunk about 86 KB gzipped (well under the 300 KB budget). Each step, the
-  workspace, the storage and encryption code, and jsPDF are separate chunks loaded on demand.
-- `/apply` loads the workspace and then the step, so on a slow connection it pays two extra
-  round trips; preloading both in parallel was measured and made it *worse* (more blocking
-  time), so it was left out.
+- **Accessibility is 100 on every step**, mobile and desktop, Step 1's error state included
+  (`scripts/lighthouse-accessibility.mjs`).
+- **`/apply` meets the performance target of 85 but not the 2.5 s LCP target.** It has to fetch
+  the workspace and the step before its heading can paint. The HTML now preloads those chunks
+  in parallel with the main bundle (an alternating A/B against the previous build: performance
+  84 → 87.5, LCP 3.74 → 3.37 s), Inter is limited to Latin plus a 1.2 KB subset for the rupee
+  sign, and the landing page is a chunk of its own. First paint on `/apply` is later than before
+  (2.0 → 2.6 s) because it now waits for that code.
+- Main JavaScript chunk about 74 KB gzipped (budget 300 KB).
+
+The brief's budgets, measured by `performance-budgets` on the production build in Cypress:
+
+| Budget | Target | Measured (17 October 2026) |
+| --- | --- | --- |
+| Step transition: Continue or Back → next step interactive | < 200 ms | median 20 ms, max 28 ms over 10 transitions |
+| Validation: leave a field → error on screen | < 100 ms | median 11 ms, max 38 ms |
+| Auto-save: encrypt the draft and write it | < 50 ms | first 12 ms, then median 2.5 ms, max 8 ms |
+
+- Transitions are timed once the next step's code has arrived. Each step downloads its
+  neighbours while the person fills it in, and Continue waits for that code instead of
+  showing a loading state. Pressing Continue within a fraction of a second of a step
+  appearing (as a test runner does) can add the rest of that download.
+- In plain Chrome with a 4× CPU slowdown (an earlier measurement), forward transitions took
+  110–270 ms, so on slow phones some exceed the 200 ms budget.
 - Five 4.1 MB photos uploaded together (measured in Chrome, development build): longest
   main-thread task 181 ms, JS heap back to its 33 MB baseline afterwards.
-- WCAG 2.1 AA: labels on every control, "Optional" in text, errors after interaction in polite
-  live regions, focus moved to each new step and to the first invalid field, and axe checks on
-  every screen in the E2E suite.
-- Responsive audit (landing page and all eight steps at 320, 375, 414, 640, 768, 1024, 1440
-  and 1920 px): no horizontal scrolling, also with a 24 px base font. Every control is at
-  least 24 × 24 px, and controls that are hard to hit on phones (progress steps, links,
-  submit blockers) are 44 px tall below 640 px.
+
+Accessibility (WCAG 2.1 AA):
+
+- Labels on every control, "Optional" in text, errors after interaction in polite live
+  regions, focus moved to each new step and to the first invalid field; axe finds no
+  violations on any screen in the E2E suite.
+- Focused fields are never hidden under the sticky header or step actions, and focus stays on
+  a field while it is verified, with the result announced.
+- 44 × 44 px touch targets on every touch screen, phones and tablets in either orientation. On
+  phones the progress bar becomes a plain bar plus an "All steps" list. With a mouse, some
+  controls on screens 640 px and wider are 36 px.
+- No horizontal scrolling from 320 to 1920 px wide, portrait and landscape; an earlier audit
+  also checked a 24 px base font.
+- Screen readers: the accessibility-tree audit passes on every page; the manual NVDA and
+  VoiceOver checklist is in [docs/screen-reader-checklist.md](docs/screen-reader-checklist.md).
 
 ## Screenshots
 
@@ -198,8 +248,13 @@ Limitations:
 - **Mobile OTP is required, email OTP optional;** codes are shown on screen.
 - The PIN directory is a sample (100+ codes); unknown PINs can still be typed manually.
 - Grievance and support emails use the reserved `.example` domain.
-- Tested in Chrome (via Playwright) and Cypress's Electron browser. Firefox, Safari and Edge
-  were not run in this environment.
+- **Browsers.** The full E2E suite runs in Electron 138 (Chromium) and the audits in Chrome 155.
+  Firefox, Safari and old Chromium are covered only by the smoke journey on Chromium 90,
+  Firefox 87 and WebKit 14.2. Edge (Chromium) was not run separately, and no real iOS or
+  Android device was available.
+- **Screen readers.** Checked automatically only; the manual NVDA and VoiceOver pass in
+  `docs/screen-reader-checklist.md` has not been run yet.
+- **`/apply` LCP** is 3.4 s on Lighthouse's simulated slow 4G, above the brief's 2.5 s target.
 
 ## Deploy
 
