@@ -27,8 +27,8 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
-  // Small buttons still meet the 44px touch target on mobile.
-  sm: 'h-11 gap-1.5 px-3 text-sm sm:h-9',
+  // Small buttons keep the 44px touch target on touch screens; only a mouse gets 36px.
+  sm: 'h-11 gap-1.5 px-3 text-sm sm:pointer-fine:h-9',
   md: 'h-11 gap-2 px-4 text-[15px]',
   lg: 'h-12 gap-2 px-6 text-base',
 };
@@ -61,8 +61,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((
       'inline-flex shrink-0 cursor-pointer items-center justify-center rounded-field font-medium whitespace-nowrap transition-[background-color,border-color,color,box-shadow,transform] duration-150 select-none',
       'active:translate-y-px disabled:cursor-not-allowed disabled:active:translate-y-0',
       variant !== 'link' && SIZE_CLASSES[size],
-      // Links get no padding but still meet the 44px touch target on phones.
-      variant === 'link' && 'min-h-11 gap-1.5 text-[15px] sm:min-h-0',
+      // Links get no padding but keep the 44px touch target on touch screens.
+      variant === 'link' && 'min-h-11 gap-1.5 text-[15px] sm:pointer-fine:min-h-0',
       VARIANT_CLASSES[variant],
       fullWidth && 'w-full',
       className,

@@ -92,7 +92,7 @@ export function DocumentChecklist({ requirements, files, signed }: DocumentCheck
             <button
               type="button"
               onClick={() => jumpTo(row.id)}
-              className="-mx-2 flex min-h-11 w-[calc(100%+1rem)] cursor-pointer items-center gap-2.5 rounded-lg px-2 text-left text-sm text-ink-soft transition-colors hover:bg-ink/[0.04] sm:min-h-9"
+              className="-mx-2 flex min-h-11 w-[calc(100%+1rem)] cursor-pointer items-center gap-2.5 rounded-lg px-2 text-left text-sm text-ink-soft transition-colors hover:bg-ink/[0.04] sm:pointer-fine:min-h-9"
             >
               {STATUS[row.status].icon}
               <span className="min-w-0 flex-1 truncate">{row.label}</span>

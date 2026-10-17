@@ -69,7 +69,7 @@ export function EmiCalculator({ onApply }: { onApply: (preset: LoanPreset) => vo
                   onChange={() => choose(id)}
                   className="peer sr-only"
                 />
-                <span className="flex min-h-11 cursor-pointer items-center justify-center rounded-lg px-2 text-sm font-medium text-slate transition-colors peer-checked:bg-surface peer-checked:text-ink peer-checked:shadow-card peer-focus-visible:shadow-focus hover:text-ink sm:min-h-9">
+                <span className="flex min-h-11 cursor-pointer items-center justify-center rounded-lg px-2 text-sm font-medium text-slate transition-colors peer-checked:bg-surface peer-checked:text-ink peer-checked:shadow-card peer-focus-visible:shadow-focus hover:text-ink sm:pointer-fine:min-h-9">
                   {LOAN_PRODUCTS[id].shortLabel}
                 </span>
               </label>

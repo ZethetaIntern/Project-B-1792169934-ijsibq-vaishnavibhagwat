@@ -39,7 +39,7 @@ export default function Step7Documents() {
             {requirements.map((requirement) => {
               const { spec } = requirement;
               return (
-                <div key={spec.id} id={documentAnchorId(spec.id)} className="scroll-mt-24 py-6 first:pt-0 last:pb-0">
+                <div key={spec.id} id={documentAnchorId(spec.id)} className="scroll-mt-4 py-6 first:pt-0 last:pb-0">
                   <Controller
                     control={control}
                     name={`files.${spec.id}`}
@@ -78,7 +78,7 @@ export default function Step7Documents() {
           title="Sign your application"
           description="Your signature is added to the application you submit on the next step."
         >
-          <div id={documentAnchorId('signature')} className="scroll-mt-24">
+          <div id={documentAnchorId('signature')} className="scroll-mt-4">
             <Controller
               control={control}
               name="signature"
