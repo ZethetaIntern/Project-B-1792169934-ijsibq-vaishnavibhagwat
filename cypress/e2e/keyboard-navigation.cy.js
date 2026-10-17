@@ -67,4 +67,31 @@ describe('Journey 13 — keyboard-only navigation', () => {
     cy.get('[role="dialog"]').should('not.exist');
     cy.get('@trigger').should('be.focused');
   });
+
+  it('never hides the focused field under the sticky header or step actions (WCAG 2.4.11)', () => {
+    cy.viewport(812, 375); // a phone on its side leaves the least room between the two
+    cy.resumeAt('address');
+    cy.get('[role="dialog"]').should('not.exist');
+    cy.document().then((doc) => {
+      // Jump instead of animating, so each check sees where the browser settled.
+      doc.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
+    });
+    const checked = new Set();
+    for (let press = 0; press < 20; press += 1) {
+      cy.realPress('Tab');
+      cy.document().then((doc) => {
+        const element = doc.activeElement;
+        if (!element || element === doc.body || element.closest('header, .sticky')
+          || element.matches('a[href="#main-content"]')) return;
+        const box = element.getBoundingClientRect();
+        const top = doc.querySelector('header').getBoundingClientRect().bottom;
+        const bottom = doc.querySelector('.sticky.bottom-0').getBoundingClientRect().top;
+        const visible = Math.min(box.bottom, bottom) - Math.max(box.top, top);
+        const name = element.getAttribute('name') ?? element.textContent.trim();
+        expect(visible, `visible height of focused ${name}`).to.be.closeTo(box.height, 1);
+        checked.add(name);
+      });
+    }
+    cy.then(() => expect(checked.size, 'fields checked').to.be.at.least(8));
+  });
 });
