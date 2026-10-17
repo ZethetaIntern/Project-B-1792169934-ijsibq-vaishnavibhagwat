@@ -19,8 +19,11 @@ Landing page (Experience A)                 Application workspace (Experience B)
                                           └───────────────────────────────────────────────┘
 ```
 
-- **React 19 + TypeScript + Vite.** Steps are code-split with `lazy()`, so only the open
-  step's code is downloaded; the main chunk is about 86 KB gzipped.
+- **React 19 + TypeScript + Vite.** Steps, the workspace and the landing page are
+  code-split with `lazy()`, so only the open page's code is downloaded; the main chunk is
+  about 74 KB gzipped. A small Vite plugin (`lendswift:preload-route-chunks`) writes
+  `modulepreload` links into the HTML, so the opened page's chunks download in parallel
+  with the main bundle instead of after it.
 - **React Hook Form** owns in-progress field state for the open step only.
 - **Zod** owns every rule. One schema per step, rebuilt from the whole application.
 - **Zustand** holds the application between steps, so Back never loses data.
@@ -54,7 +57,9 @@ src/
   constants/      loan products, steps, documents, labels, persistence settings
   demo/           demo scenarios, fill logic, sample documents
   types/          ApplicationData — one slice per step
-cypress/          E2E journeys, fixtures, custom commands (fillStep1 … fillStep8)
+cypress/          E2E journeys, fixtures, custom commands (fillStep1 … fillStep8, resumeAt)
+scripts/          Lighthouse and accessibility-tree audits, legacy-browser smoke test,
+                  terms PDF generator
 ```
 
 The brief's directory tree (C1) was missing from the PDF, so this layout follows the
@@ -103,6 +108,8 @@ is no cache to invalidate. Highlights:
 
 - **Step 5** is a `z.discriminatedUnion` on `employmentType`. Parsing keeps only the active
   branch's fields, so switching from Salaried to Self-employed clears stale salary data.
+  Salaried applicants may add up to three previous employers (`useFieldArray`); older
+  drafts without the list load through a `.default([])`.
 - **`superRefine`** produces specific messages ("PAN 4th character must indicate entity type…")
   rather than generic ones; transforms normalise input (NFC, invisible characters removed).
 - **Step 7** builds its rules from the document requirements engine and drops files for
@@ -203,10 +210,39 @@ browser and dropped into the real uploaders.
 
 ## 10. Accessibility and performance decisions
 
+Accessibility:
+
 - Labels on every control; optional fields say "Optional" in text.
 - Errors appear after a field is changed and left, or on Continue — never on first render —
-  and live in polite live regions linked with `aria-describedby`.
-- Focus moves to the first field on each step, and to the first invalid field when
-  Continue fails; dialogs trap focus and return it.
-- 44 px touch targets on phones; layouts tested from 320 px.
+  and live in polite live regions linked with `aria-describedby`. Radio groups set
+  `aria-invalid` from that same error state; otherwise the browser would expose an
+  unchosen required radio as invalid before the person had done anything.
+- Focus moves to the first field on each step and to the first invalid field when
+  Continue fails; dialogs trap focus and return it. When a Verify button or a one-time-code
+  panel gives way, focus stays on (or returns to) the field being verified, and the result
+  is announced.
+- `scroll-padding` on the root keeps a focused field clear of the sticky header and the
+  sticky step actions, wherever Tab, an anchor or an error scrolls it (WCAG 2.4.11).
+- 44 × 44 px touch targets on every touch screen, phones and tablets either way up. Smaller
+  controls only appear on screens 640 px and wider with a mouse (`sm:pointer-fine:`). On
+  phones the eight progress segments (about 31 px wide each) become a plain bar plus an
+  "All steps" list of full-width rows.
+- Checked by axe on every screen, Lighthouse accessibility (100 on every page), an
+  accessibility-tree audit, and the manual checklist in `docs/screen-reader-checklist.md`.
+
+Performance:
+
 - Code splitting per step; jsPDF and html2canvas are only fetched when a PDF is created.
+  Each step preloads its neighbours, and Continue or Back waits for the next step's code
+  before switching, which avoids React's 300 ms Suspense reveal delay.
+- Cross-step revalidation runs inside `useTransition`, and the loan ledger and the EMI
+  calculator read `useDeferredValue`, so typing never waits for them.
+- The encryption key is derived up front, so the first auto-save is not slowed by it.
+- Inter is loaded for Latin only, with a 1.2 KB subset for the rupee sign instead of the
+  83 KB Latin Extended file.
+
+Browser support (Chrome and Edge 90+, Firefox 88+, Safari 14+): Tailwind's cascade layers
+are flattened by PostCSS, the build targets those versions, `eslint-plugin-compat` flags
+newer APIs, and `crypto.randomUUID` and the SHA-256 key derivation have fallbacks.
+`scripts/legacy-browser-smoke.cjs` runs a journey on Chromium 90, Firefox 87 and WebKit
+14.2 (Safari 14).
