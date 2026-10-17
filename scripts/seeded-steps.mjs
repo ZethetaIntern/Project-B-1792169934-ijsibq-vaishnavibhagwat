@@ -61,11 +61,15 @@ export async function openFreshApplication(page) {
   await waitForStep(page);
 }
 
-/** Opens `step` of a complete Home Loan application (call on a page already at BASE). */
+/**
+ * Opens `step` of a complete Home Loan application (call on a page already at BASE).
+ * Loads a bare /apply rather than reloading, because a `?step=` left in the URL by an
+ * earlier step would win over the draft.
+ */
 export async function openSeededStep(page, step) {
   await page.evaluate(clearStorage);
   await page.evaluate(seedDraft, { dev: DEV, step });
-  await page.reload();
+  await page.goto(`${BASE}/apply`);
   const resume = await page.waitForSelector('xpath/.//button[contains(., "Resume application")]');
   await resume.click();
   await waitForStep(page);
