@@ -1,7 +1,9 @@
 /**
- * Touch targets of at least 44×44 px on phones (the brief's accessibility list,
- * WCAG 2.5.5), checked at 320 px wide, the narrowest supported screen, on the
- * landing page and every step.
+ * Touch targets of at least 44×44 px on touch screens (the brief's accessibility
+ * list, WCAG 2.5.5), on the landing page and every step: a 320 px phone, a phone
+ * on its side and a tablet both ways. The browser is switched to touch emulation
+ * (pointer: coarse), as on a real phone or tablet; with a mouse, controls on
+ * screens 640 px and wider are allowed to be more compact.
  *
  * A control's target is its own box grown by its labels and everything inside
  * them: tapping a label activates its control, and checkbox labels stretch an
@@ -31,25 +33,47 @@ function describeControl(element) {
   return `<${element.tagName.toLowerCase()}${element.type ? ` type=${element.type}` : ''}> "${name.slice(0, 40)}"`;
 }
 
-/** Fails with a list of every visible control whose target is under 44×44 px. */
-function checkTouchTargets(where) {
-  cy.document().then((doc) => {
-    const small = [...doc.querySelectorAll(CONTROLS)].flatMap((element) => {
-      const own = element.getBoundingClientRect();
-      const style = doc.defaultView.getComputedStyle(element);
-      if (own.width === 0 || own.height === 0 || style.visibility === 'hidden') return [];
-      if (style.display === 'inline' && element.closest('p, li, label')) return [];
-      if (style.clipPath === 'inset(50%)') return []; // visually hidden (sr-only)
-      const box = targetBox(element);
-      if (box.width >= MIN - 0.5 && box.height >= MIN - 0.5) return [];
-      return [`${describeControl(element)} ${Math.round(box.width)}×${Math.round(box.height)}`];
-    });
-    expect(small, `controls under ${MIN}×${MIN} px on ${where}`).to.deep.equal([]);
+const PHONE = [320, 640];
+const TOUCH_SCREENS = [PHONE, [812, 375], [768, 1024], [1024, 768]];
+
+/** Every visible control whose target is under 44×44 px. */
+function smallControls(doc) {
+  return [...doc.querySelectorAll(CONTROLS)].flatMap((element) => {
+    const own = element.getBoundingClientRect();
+    const style = doc.defaultView.getComputedStyle(element);
+    if (own.width === 0 || own.height === 0 || style.visibility === 'hidden') return [];
+    if (style.display === 'inline' && element.closest('p, li, label')) return [];
+    if (style.clipPath === 'inset(50%)') return []; // visually hidden (sr-only)
+    const box = targetBox(element);
+    if (box.width >= MIN - 0.5 && box.height >= MIN - 0.5) return [];
+    return [`${describeControl(element)} ${Math.round(box.width)}×${Math.round(box.height)}`];
   });
 }
 
-describe('Touch targets — 44×44 px at 320 px wide', () => {
-  beforeEach(() => cy.viewport(320, 640));
+/** Resizes through the screens and fails with every undersized control found. */
+function checkTouchTargets(where, screens = TOUCH_SCREENS) {
+  const small = [];
+  screens.forEach(([width, height]) => {
+    cy.viewport(width, height);
+    cy.document().then((doc) => {
+      small.push(...smallControls(doc).map((control) => `${width}×${height} ${control}`));
+    });
+  });
+  cy.then(() => expect(small, `controls under ${MIN}×${MIN} px on ${where}`).to.deep.equal([]));
+}
+
+/** Makes the browser report a touch screen (pointer: coarse) instead of a mouse. */
+const emulateTouch = (enabled) => cy.then(() => Cypress.automation('remote:debugger:protocol', {
+  command: 'Emulation.setTouchEmulationEnabled',
+  params: enabled ? { enabled, maxTouchPoints: 5 } : { enabled },
+}));
+
+describe('Touch targets — 44×44 px on phones and tablets, both ways up', () => {
+  beforeEach(() => {
+    emulateTouch(true);
+    cy.viewport(...PHONE);
+  });
+  after(() => emulateTouch(false));
 
   it('on the landing page and the demo launcher', () => {
     cy.visit('/');
@@ -63,9 +87,10 @@ describe('Touch targets — 44×44 px at 320 px wide', () => {
   it('on Step 1, with the step list open', () => {
     cy.startApplication();
     checkTouchTargets('Step 1');
+    cy.viewport(...PHONE);
     cy.contains('button', 'All steps').click();
     cy.get('nav[aria-label^="Application progress"] ol').should('be.visible');
-    checkTouchTargets('the step list');
+    checkTouchTargets('the step list', [PHONE]);
     cy.checkPageA11y('body');
   });
 
