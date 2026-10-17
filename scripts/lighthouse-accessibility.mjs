@@ -2,10 +2,8 @@
 /**
  * Lighthouse accessibility on the landing page and every step of the production
  * build, Step 1's error state included. A Lighthouse user flow audits each page as
- * it is on screen (snapshot mode), so later steps are reached the way
- * `cy.resumeAt` does it: the app's own fixture, vault and draft modules, served by
- * the Vite dev server, save an encrypted draft into the production origin and the
- * page resumes it.
+ * it is on screen (snapshot mode); later steps are opened from a seeded draft,
+ * the way `cy.resumeAt` does it (see seeded-steps.mjs).
  *
  *   npm run build && npx vite preview --port 4173    (terminal 1)
  *   npx vite --port 5173                              (terminal 2)
@@ -21,49 +19,13 @@ import path from 'node:path';
 import { startFlow, desktopConfig } from 'lighthouse';
 // eslint-disable-next-line import-x/no-unresolved -- installed on demand (see above)
 import puppeteer from 'puppeteer-core';
+import {
+  BASE, CHROME, LATER_STEPS, openFreshApplication, openSeededStep, pause,
+  // eslint-disable-next-line import-x/extensions -- Node needs the extension in ES modules
+} from './seeded-steps.mjs';
 
 const FORM = process.argv[2] === 'desktop' ? 'desktop' : 'mobile';
 const OUT = process.argv[3] || os.tmpdir();
-const BASE = 'http://localhost:4173';
-const DEV = 'http://localhost:5173';
-const CHROME = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
-const LATER_STEPS = ['personal', 'kyc', 'address', 'employment', 'coApplicant', 'documents', 'review'];
-
-const pause = (ms) => new Promise((resolve) => {
-  setTimeout(resolve, ms);
-});
-
-/** Runs in the page: saves a complete Home Loan application, open at `step`. */
-async function seedDraft({ dev, step }) {
-  const { createScenario } = await import(`${dev}/src/test/fixtures.ts`);
-  const { putFile, resetVaultConnection } = await import(`${dev}/src/utils/documentVault.ts`);
-  const { saveDraft } = await import(`${dev}/src/utils/draftStorage.ts`);
-  const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-  const blobFor = (mimeType) => (mimeType.startsWith('image/')
-    ? new Blob([Uint8Array.from(atob(png), (char) => char.charCodeAt(0))], { type: 'image/png' })
-    : new Blob(['%PDF-1.7\n% seeded\n'], { type: mimeType }));
-
-  const data = createScenario('home', 'salaried');
-  data.documents.signature = `data:image/png;base64,${png}`;
-  data.documents.signatureMethod = 'type';
-  if (data.coApplicant.signature) data.coApplicant.signature = data.documents.signature;
-  const files = [...Object.values(data.documents.files).flat(), ...data.address.addressProof];
-  await Promise.all(files.map((file) => putFile(file.id, blobFor(file.mimeType))));
-  resetVaultConnection();
-  await saveDraft({ data, currentStepId: step }, 'lighthouse-seed');
-}
-
-/** Runs in the page: forgets every draft, file and demo. */
-async function clearStorage() {
-  localStorage.clear();
-  sessionStorage.clear();
-  await new Promise((resolve) => {
-    const request = indexedDB.deleteDatabase('lendswift_vault');
-    request.onsuccess = resolve;
-    request.onerror = resolve;
-    request.onblocked = resolve;
-  });
-}
 
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: 'new' });
 const page = await browser.newPage();
@@ -78,18 +40,9 @@ const config = FORM === 'desktop'
   : { extends: 'lighthouse:default', settings: { onlyCategories: ['accessibility'] } };
 const flow = await startFlow(page, { name: `LendSwift accessibility (${FORM})`, config });
 
-async function waitForStep() {
-  await page.waitForSelector('[data-step-ready]', { timeout: 15000 });
-  await page.waitForFunction(() => !document.querySelector('[role="dialog"]'), { timeout: 10000 });
-  await pause(800); // let the step's entrance animation finish
-}
-
 await flow.navigate(`${BASE}/`, { name: 'Landing page' });
 
-await page.goto(`${BASE}/apply`);
-await page.evaluate(clearStorage);
-await page.reload();
-await waitForStep();
+await openFreshApplication(page);
 await flow.snapshot({ name: 'Step 1 · Choose your loan' });
 await page.click('button[type="submit"][form="wizard-step-form"]');
 await pause(800);
@@ -97,12 +50,7 @@ await flow.snapshot({ name: 'Step 1 · with errors' });
 
 // One step after another: the flow records snapshots in order.
 await LATER_STEPS.reduce((previous, step, index) => previous.then(async () => {
-  await page.evaluate(clearStorage);
-  await page.evaluate(seedDraft, { dev: DEV, step });
-  await page.reload();
-  const resume = await page.waitForSelector('xpath/.//button[contains(., "Resume application")]');
-  await resume.click();
-  await waitForStep();
+  await openSeededStep(page, step);
   const heading = await page.$eval('h1', (h1) => h1.textContent);
   await flow.snapshot({ name: `Step ${index + 2} · ${heading}` });
 }), Promise.resolve());
