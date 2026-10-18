@@ -72,7 +72,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((
           <Check
             aria-hidden="true"
             strokeWidth={3}
-            className="pointer-events-none absolute size-3.5 text-white opacity-0 transition-opacity peer-checked:opacity-100"
+            className="pointer-events-none absolute size-3.5 scale-90 text-white opacity-0 transition-[opacity,scale] duration-150 ease-out-quart peer-checked:scale-100 peer-checked:opacity-100"
           />
         </span>
         <span className="flex min-w-0 flex-col gap-1">

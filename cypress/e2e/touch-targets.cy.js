@@ -51,10 +51,24 @@ function smallControls(doc) {
 }
 
 /** Resizes through the screens and fails with every undersized control found. */
+/**
+ * Waits for entrances to finish (a dialog grows in from 98%), so controls are
+ * measured at their real size. Endless animations, such as spinners, are ignored.
+ */
+function waitForAnimations() {
+  cy.document().should((doc) => {
+    const running = doc.getAnimations()
+      .filter((animation) => animation.playState === 'running'
+        && animation.effect?.getComputedTiming().endTime !== Infinity);
+    expect(running, 'animations still running').to.have.length(0);
+  });
+}
+
 function checkTouchTargets(where, screens = TOUCH_SCREENS) {
   const small = [];
   screens.forEach(([width, height]) => {
     cy.viewport(width, height);
+    waitForAnimations();
     cy.document().then((doc) => {
       small.push(...smallControls(doc).map((control) => `${width}×${height} ${control}`));
     });

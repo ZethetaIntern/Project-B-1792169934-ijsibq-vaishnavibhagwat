@@ -44,11 +44,12 @@ export function HelpFaq() {
       <div className="divide-y divide-line rounded-card border border-line bg-surface">
         {QUESTIONS.map((item) => (
           <details key={item.question} className="group px-5">
-            <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-3 text-[15px] font-medium text-ink [&::-webkit-details-marker]:hidden">
+            <summary className="group/question flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-3 text-[15px] font-medium text-ink [&::-webkit-details-marker]:hidden">
               {item.question}
-              <ChevronDown aria-hidden="true" className="size-4 shrink-0 text-slate transition-transform group-open:rotate-180 motion-reduce:transition-none" />
+              <ChevronDown aria-hidden="true" className="size-4 shrink-0 text-slate transition-[color,transform] duration-200 ease-out-quart group-open:rotate-180 group-hover/question:text-ink" />
             </summary>
-            <p className="pb-4 text-sm leading-6 text-slate">{item.answer}</p>
+            {/* Settles in as the question opens, instead of appearing all at once. */}
+            <p className="animate-disclose pb-4 text-sm leading-6 text-slate">{item.answer}</p>
           </details>
         ))}
       </div>

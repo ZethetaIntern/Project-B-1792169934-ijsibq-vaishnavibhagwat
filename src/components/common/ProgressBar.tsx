@@ -80,13 +80,13 @@ export function ProgressBar({
           className="-mr-2 inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md px-2 text-sm font-medium text-cobalt"
         >
           All steps
-          <ChevronDown aria-hidden="true" className={cn('size-4 transition-transform', listOpen && 'rotate-180')} />
+          <ChevronDown aria-hidden="true" className={cn('size-4 transition-transform duration-200 ease-out-quart', listOpen && 'rotate-180')} />
         </button>
       </div>
 
       <ol
         id={listId}
-        className={cn(listOpen ? 'mt-2 flex flex-col gap-1' : 'hidden', 'sm:mt-0 sm:grid sm:gap-1.5')}
+        className={cn(listOpen ? 'mt-2 flex flex-col gap-1 max-sm:animate-disclose' : 'hidden', 'sm:mt-0 sm:grid sm:gap-1.5')}
         style={columns}
       >
         {steps.map((step, index) => {

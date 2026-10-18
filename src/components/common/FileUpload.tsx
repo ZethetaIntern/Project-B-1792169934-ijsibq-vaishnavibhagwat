@@ -165,7 +165,7 @@ export function FileUpload({
           )}
         >
           <input {...getInputProps({ 'aria-label': `Choose ${label} files` })} data-testid={`upload-input-${name}`} />
-          <UploadCloud aria-hidden="true" className={cn('size-6 shrink-0', isDragActive ? 'text-cobalt' : 'text-muted')} />
+          <UploadCloud aria-hidden="true" className={cn('size-6 shrink-0 transition-[color,translate] duration-200 ease-out-quart', isDragActive ? '-translate-y-0.5 text-cobalt' : 'text-muted')} />
           <p className="flex-1 text-sm text-slate">
             {isDragActive ? 'Drop to upload' : (
               <>
