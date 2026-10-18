@@ -230,6 +230,17 @@ Accessibility:
 - Checked by axe on every screen, Lighthouse accessibility (100 on every page), an
   accessibility-tree audit, and the manual checklist in `docs/screen-reader-checklist.md`.
 
+Motion:
+
+- Hover, press and colour changes are CSS transitions on the shared `--ease-out-quart` curve,
+  150–250 ms. Buttons scale to 97% when pressed, and forward arrows move 2px on hover.
+- The calculator's loan-type switch is one pill moved with `transform`, so the eye follows
+  the choice; FAQ answers and the phone step list use `animate-disclose` (8px, 200 ms).
+- Hover effects sit behind `@media (hover: hover)` (Tailwind's default) so a tap on a touch
+  screen never leaves one stuck, and the global reduced-motion rule turns movement off.
+- Dialogs grow in but close at once: two of them change their content as they close, and
+  freezing it for an exit animation was not worth the risk.
+
 Performance:
 
 - Code splitting per step; jsPDF and html2canvas are only fetched when a PDF is created.
