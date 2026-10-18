@@ -58,7 +58,13 @@ export function EmiCalculator({ onApply }: { onApply: (preset: LoanPreset) => vo
 
         <fieldset>
           <legend className="sr-only">Loan type</legend>
-          <div className="grid grid-cols-3 gap-1 rounded-field bg-canvas-sunken p-1">
+          <div className="relative grid grid-cols-3 gap-1 rounded-field bg-canvas-sunken p-1">
+            {/* One pill slides to the chosen type, so the eye follows the change. */}
+            <span
+              aria-hidden="true"
+              className="absolute inset-y-1 left-1 w-[calc((100%-1rem)/3)] rounded-lg bg-surface shadow-card transition-transform duration-250 ease-in-out-quart"
+              style={{ transform: `translateX(calc(${LOAN_TYPES.indexOf(loanType)} * (100% + 0.25rem)))` }}
+            />
             {LOAN_TYPES.map((id) => (
               <label key={id} className="relative">
                 <input
@@ -69,7 +75,7 @@ export function EmiCalculator({ onApply }: { onApply: (preset: LoanPreset) => vo
                   onChange={() => choose(id)}
                   className="peer sr-only"
                 />
-                <span className="flex min-h-11 cursor-pointer items-center justify-center rounded-lg px-2 text-sm font-medium text-slate transition-colors peer-checked:bg-surface peer-checked:text-ink peer-checked:shadow-card peer-focus-visible:shadow-focus hover:text-ink sm:pointer-fine:min-h-9">
+                <span className="flex min-h-11 cursor-pointer items-center justify-center rounded-lg px-2 text-sm font-medium text-slate transition-colors duration-250 ease-in-out-quart peer-checked:text-ink peer-focus-visible:shadow-focus hover:text-ink sm:pointer-fine:min-h-9">
                   {LOAN_PRODUCTS[id].shortLabel}
                 </span>
               </label>
