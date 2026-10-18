@@ -107,7 +107,7 @@ export const MaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>((
       aria-pressed={revealed}
       aria-label={`${revealed ? 'Hide' : 'Show'} ${revealLabel}`}
       onClick={() => setRevealed((current) => !current)}
-      className="flex size-11 items-center justify-center rounded-lg text-slate hover:text-ink"
+      className="flex size-11 items-center justify-center rounded-lg text-slate transition-colors hover:text-ink"
     >
       {revealed ? <EyeOff aria-hidden="true" className="size-[18px]" /> : <Eye aria-hidden="true" className="size-[18px]" />}
     </button>

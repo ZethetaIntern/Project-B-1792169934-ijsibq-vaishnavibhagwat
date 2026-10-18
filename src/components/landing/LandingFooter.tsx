@@ -8,7 +8,7 @@ function FooterLink({ href, children, external = false }: {
     <a
       href={href}
       {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-      className="inline-flex min-h-11 items-center text-sm text-slate underline-offset-4 hover:text-ink hover:underline sm:pointer-fine:min-h-6"
+      className="inline-flex min-h-11 items-center text-sm text-slate underline-offset-4 transition-colors hover:text-ink hover:underline sm:pointer-fine:min-h-6"
     >
       {children}
       {external && <span className="sr-only"> (opens in a new tab)</span>}
