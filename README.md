@@ -5,7 +5,7 @@ LendSwift, a fictional NBFC serving tier-2 and tier-3 India on patchy mobile net
 replaces a single-page form that lost 45% of applicants with a guided flow that validates
 gently, saves as you go and works from 320 px phones up.
 
-> **Live demo:** _add the Vercel or Netlify URL here after deploying (see [Deploy](#deploy))._
+> **Live demo:** not deployed; run it locally with the [Quick start](#quick-start) below.
 > LendSwift is fictional. Nothing you enter leaves your browser; verification is simulated
 > and no credit decision is made.
 
@@ -39,7 +39,9 @@ gently, saves as you go and works from 320 px phones up.
 Across the flow: encrypted auto-save (AES-256-GCM, 72-hour expiry, tamper detection),
 resume-or-start-fresh prompt, multi-tab warning, offline banner, 15-minute idle timeout,
 browser Back support, and a **demo mode** with four synthetic scenarios that never skips a
-check.
+check. Motion stays restrained: buttons give slightly when pressed, the calculator's loan-type
+switch slides, FAQ answers and the phone step list settle in. Hover effects only apply on
+devices that can hover, and a reduced-motion setting turns the movement off.
 
 ## Quick start
 
@@ -123,7 +125,7 @@ A full walkthrough is in **[ARCHITECTURE.md](ARCHITECTURE.md)**. In short:
 | End-to-end (Cypress 15 + cypress-axe, Electron 138) | 16 spec files, 61 tests | 61 passing with retries turned off |
 | Lint (`eslint .`) and types (`tsc -b`) | | clean |
 
-Latest run: 17 October 2026. `cypress.config.js` keeps one retry for CI; the figure above
+Latest run: 18 October 2026. `cypress.config.js` keeps one retry for CI; the figure above
 is from a run with retries set to 0.
 
 The Cypress specs map to the brief's journeys:
@@ -255,6 +257,10 @@ Limitations:
 - **Screen readers.** Checked automatically only; the manual NVDA and VoiceOver pass in
   `docs/screen-reader-checklist.md` has not been run yet.
 - **`/apply` LCP** is 3.4 s on Lighthouse's simulated slow 4G, above the brief's 2.5 s target.
+- **Timing budgets on a busy machine.** `performance-budgets` measures real time, so a heavily
+  loaded machine can push a single sample over its budget. On 18 October, 1 run in 8 had a
+  65 ms first auto-save write (budget 50 ms); the build without the motion changes was just
+  as noisy, with a 188 ms transition in another run.
 
 ## Deploy
 
