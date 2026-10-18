@@ -58,8 +58,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((
     disabled={disabled || loading}
     aria-busy={loading || undefined}
     className={cn(
-      'inline-flex shrink-0 cursor-pointer items-center justify-center rounded-field font-medium whitespace-nowrap transition-[background-color,border-color,color,box-shadow,transform] duration-150 select-none',
-      'active:translate-y-px disabled:cursor-not-allowed disabled:active:translate-y-0',
+      'group/button inline-flex shrink-0 cursor-pointer items-center justify-center rounded-field font-medium whitespace-nowrap transition-[background-color,border-color,color,box-shadow,scale] duration-150 ease-out-quart select-none',
+      // Press feedback: the whole button, label and icons, gives slightly.
+      'active:scale-[0.97] disabled:cursor-not-allowed disabled:active:scale-100',
       variant !== 'link' && SIZE_CLASSES[size],
       // Links get no padding but keep the 44px touch target on touch screens.
       variant === 'link' && 'min-h-11 gap-1.5 text-[15px] sm:pointer-fine:min-h-0',
@@ -70,7 +71,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((
   >
     {loading ? <Spinner className="size-4" /> : leadingIcon}
     <span>{loading && loadingText ? loadingText : children}</span>
-    {!loading && trailingIcon}
+    {!loading && trailingIcon && (
+      // Forward arrows lean the way they point while the pointer is over the button.
+      <span className="flex transition-transform duration-200 ease-out-quart group-hover/button:translate-x-0.5 group-disabled/button:translate-x-0">
+        {trailingIcon}
+      </span>
+    )}
   </button>
 ));
 
